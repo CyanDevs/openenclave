@@ -69,9 +69,7 @@ def buildLinuxManagedImage(String os_type, String version) {
                         def cmd = ("packer build -force " +
                                     "-var-file=${WORKSPACE}/.jenkins/infrastructure/provision/templates/packer/azure_managed_image/${os_type}-${version}-variables.json " +
                                     "${WORKSPACE}/.jenkins/infrastructure/provision/templates/packer/azure_managed_image/packer-${os_type}.json")
-                        oe.exec_with_retry(10, 300) {
-                            oe.azureEnvironment(cmd, params.OE_DEPLOY_IMAGE)
-                        }
+                        oe.azureEnvironment(cmd, params.OE_DEPLOY_IMAGE)
                     }
                 }
             }
@@ -137,8 +135,10 @@ def buildWindowsManagedImage(String os_series, String img_name_suffix, String la
                         echo "launch_configuration: ${launch_configuration}" >> $WORKSPACE/scripts/ansible/inventory/host_vars/\$PRIVATE_IP
 
                         cd $WORKSPACE/scripts/ansible
-                        retrycmd_if_failure 5 10 2h ansible-playbook oe-windows-acc-setup.yml
-                        retrycmd_if_failure 5 10 30m ansible-playbook jenkins-packer.yml
+                        # retrycmd_if_failure 5 10 2h ansible-playbook oe-windows-acc-setup.yml
+                        # retrycmd_if_failure 5 10 30m ansible-playbook jenkins-packer.yml
+                        ansible-playbook oe-windows-acc-setup.yml
+                        ansible-playbook jenkins-packer.yml
 
                         az vm run-command invoke \
                             --resource-group ${vm_rg_name} \
@@ -186,13 +186,11 @@ def buildWindowsManagedImage(String os_series, String img_name_suffix, String la
                         ${az_login_script}
                         az group delete --name ${vm_rg_name} --yes
                     """
-                    oe.exec_with_retry(10, 300) {
-                        try {
-                            oe.azureEnvironment(az_rg_create_script, params.OE_DEPLOY_IMAGE)
-                            oe.azureEnvironment(az_build_managed_img_script, params.OE_DEPLOY_IMAGE)
-                        } finally {
-                            oe.azureEnvironment(az_rg_cleanup_script, params.OE_DEPLOY_IMAGE)
-                        }
+                    try {
+                        oe.azureEnvironment(az_rg_create_script, params.OE_DEPLOY_IMAGE)
+                        oe.azureEnvironment(az_build_managed_img_script, params.OE_DEPLOY_IMAGE)
+                    } finally {
+                        oe.azureEnvironment(az_rg_cleanup_script, params.OE_DEPLOY_IMAGE)
                     }
                 }
             }
@@ -200,11 +198,12 @@ def buildWindowsManagedImage(String os_series, String img_name_suffix, String la
     }
 }
 
-parallel "Build Ubuntu 16.04"              : { buildLinuxManagedImage("ubuntu", "16.04") },
-         "Build Ubuntu 18.04"              : { buildLinuxManagedImage("ubuntu", "18.04") },
-         "Build RHEL 8"                    : { buildLinuxManagedImage("rhel", "8") },
-         "Build Windows 2016 SGX1"         : { buildWindowsManagedImage("win2016", "ws2016-SGX", "SGX1") },
-         "Build Windows 2016 SGX1FLC DCAP" : { buildWindowsManagedImage("win2016", "ws2016-SGX-DCAP", "SGX1FLC") },
-         "Build Windows 2016 nonSGX"       : { buildWindowsManagedImage("win2016", "ws2016-nonSGX", "SGX1FLC-NoIntelDrivers") },
-         "Build Windows 2019 SGX1"         : { buildWindowsManagedImage("win2019", "ws2019-SGX", "SGX1") },
-         "Build Windows 2019 SGX1FLC DCAP" : { buildWindowsManagedImage("win2019", "ws2019-SGX-DCAP", "SGX1FLC") }
+// parallel "Build Ubuntu 16.04"              : { buildLinuxManagedImage("ubuntu", "16.04") },
+//          "Build Ubuntu 18.04"              : { buildLinuxManagedImage("ubuntu", "18.04") },
+//          "Build RHEL 8"                    : { buildLinuxManagedImage("rhel", "8") },
+//          "Build Windows 2016 SGX1"         : { buildWindowsManagedImage("win2016", "ws2016-SGX", "SGX1") },
+//          "Build Windows 2016 SGX1FLC DCAP" : { buildWindowsManagedImage("win2016", "ws2016-SGX-DCAP", "SGX1FLC") },
+//          "Build Windows 2016 nonSGX"       : { buildWindowsManagedImage("win2016", "ws2016-nonSGX", "SGX1FLC-NoIntelDrivers") },
+//          "Build Windows 2019 SGX1"         : { buildWindowsManagedImage("win2019", "ws2019-SGX", "SGX1") },
+//          "Build Windows 2019 SGX1FLC DCAP" : { buildWindowsManagedImage("win2019", "ws2019-SGX-DCAP", "SGX1FLC") }
+buildWindowsManagedImage("win2016", "ws2016-SGX", "SGX1")
