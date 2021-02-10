@@ -431,18 +431,9 @@ function Install-PSW {
             Get-Service "AESMService"
         }
     }
-    try {
+    Start-ExecuteWithRetry -ScriptBlock {
         Start-Service -Name "AESMService" -ErrorAction Stop
-    }
-    catch {
-        $msg = @()
-        $err = $_.Exception
-        do {
-            $msg += $err.Message
-            $err = $err.InnerException
-        } while ($err)
-        Write-Verbose "Failed to start service: $($msg -join ' - ')"
-    }
+    } -RetryMessage "Failed to start AESMService. Retrying"
 }
 
 function Install-VisualStudio {
