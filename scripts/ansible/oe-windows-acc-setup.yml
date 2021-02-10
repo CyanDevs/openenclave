@@ -59,34 +59,6 @@
         -NSISURL             "{{ nsis_url }}"
         -NSISHash            "{{ nsis_hash }}"
 
-    # - name: OE setup | Run the install-intel-sgx.ps1 script (this may take a while)
-    #   script: ../install-intel-sgx.ps1
-    #     -InstallPath         "C:\oe_prereqs"
-    #     -LaunchConfiguration "{{ launch_configuration }}"
-    #     -DCAPClientType      "Azure"
-    #     -IntelPSWURL         "{{ intel_psw_url }}"
-    #     -IntelPSWHash        "{{ intel_psw_hash }}"
-    #     -IntelDCAPURL        "{{ intel_dcap_url }}"
-    #     -IntelDCAPHash       "{{ intel_dcap_hash }}"
-    #     -GitURL              "{{ git_url }}"
-    #     -GitHash             "{{ git_hash }}"
-    #     -SevenZipURL         "{{ seven_zip_url }}"
-    #     -SevenZipHash        "{{ seven_zip_hash }}"
-    #     -VSBuildToolsURL     "{{ vs_buildtools }}"
-    #     -VSBuildToolsHash    "{{ vs_buildtools_hash }}"
-    #     -ClangURL            "{{ clang_url }}"
-    #     -ClangHash           "{{ clang_hash }}"
-    #     -ShellCheckURL       "{{ shellcheck_url }}"
-    #     -ShellCheckHash      "{{ shellcheck_hash }}"
-    #     -NugetURL            "{{ nuget_url }}"
-    #     -NugetHash           "{{ nuget_hash }}"
-    #     -DevconURL           "{{ devcon_package_url }}"
-    #     -DevconHash          "{{ devcon_package_hash }}"
-    #     -AzureDCAPNupkgURL   "{{ az_dcap_client_url }}"
-    #     -AzureDCAPNupkgHash  "{{ az_dcap_client_hash }}"
-    #     -NSISURL             "{{ nsis_url }}"
-    #     -NSISHash            "{{ nsis_hash }}"
-
 
      # One way to ensure the system is reliable just after a reboot, is to set WinRM to a delayed startup
     - name: Ensure WinRM starts when the system has settled and is ready to work reliably
