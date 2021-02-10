@@ -433,15 +433,8 @@ function Install-PSW {
     }
     try {
         Start-Service -Name "AESMService" -ErrorAction Stop
-    }
-    catch {
-        $msg = @()
-        $err = $_.Exception
-        do {
-            $msg += $err.Message
-            $err = $err.InnerException
-        } while ($err)
-        Write-Verbose "Failed to start service: $($msg -join ' - ')"
+    } catch {
+        Write-Verbose "Hello?"
     }
 }
 
@@ -613,7 +606,7 @@ function Install-DCAP-Dependencies {
     }
 
     # Starting from Intel SGX 2.12, the Intel SGX PSW package contains DCAP and PSW for Windows Server 2016/2019, and Windows 10.
-    if (($LaunchConfiguration -ne "SGX1FLC-NoIntelDrivers") -and ($LaunchConfiguration -ne "SGX1-NoIntelDrivers")) {
+    if (($OS_VERSION -eq "WinServer2019") -or ($OS_VERSION -eq "Win10")) {
         Install-PSW
     }
 
@@ -683,34 +676,14 @@ function Install-NSIS {
 
 try {
     Start-LocalPackagesDownload
-
     Install-7Zip
     Install-Nuget
-    Install-Python3
-    Install-VisualStudio
-    Install-OpenSSL
-    Install-LLVM
-    Install-Git
-    Install-Shellcheck
-    Install-NSIS
-
-    if (($LaunchConfiguration -ne "SGX1FLC-NoIntelDrivers") -and ($LaunchConfiguration -ne "SGX1-NoIntelDrivers") -or ($DCAPClientType -eq "Azure")) {
+    if($DCAPClientType -eq "Azure") {
+        # This has an edge case which is a user uses windows 2019, turns off Windows Update, runs this scripts and has an old PSW
+        # and then the latest dcap.. change would require splitting and refactoring the below into seperate functions but there seems
+        # to be an issue with EnclaveCommonAPI. Opening https://github.com/openenclave/openenclave/issues/3524 to tracK
         Install-DCAP-Dependencies
     }
-
-    Install-VCRuntime
-
-
-    # The Open Enclave source directory tree might have file paths exceeding
-    # the default limit of 260 characters (especially the 3rd party libraries
-    # file paths). Unless the git directory location is short (for example
-    # `C:\` or `D:\`), there is a high chance that file paths will exceed 260
-    # characters, leading to `Filename too long` file system erros. The fix
-    # for this is to disable the file path limit via the proper registry key.
-    Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" `
-                     -Name LongPathsEnabled `
-                     -Value 1
-
     Write-Output 'Please reboot your computer for the configuration to complete.'
 } catch {
     Write-Output $_.ToString()
