@@ -19,6 +19,10 @@ def buildDockerImages() {
             }
             String buildArgs = oe.dockerBuildArgs("UID=\$(id -u)", "UNAME=\$(id -un)",
                                                   "GID=\$(id -g)", "GNAME=\$(id -gn)")
+            stage("Build Ubuntu 20.04 Full Docker Image") {
+                oefull2004 = oe.dockerImage("oetools-full-20.04:${DOCKER_TAG}", ".jenkins/infrastructure/dockerfiles/Dockerfile.full", "${buildArgs} --build-arg ubuntu_version=20.04 --build-arg devkits_uri=${DEVKITS_URI}")
+                puboefull2004 = oe.dockerImage("oeciteam/oetools-full-20.04:${DOCKER_TAG}", ".jenkins/infrastructure/dockerfiles/Dockerfile.full", "${buildArgs} --build-arg ubuntu_version=20.04 --build-arg devkits_uri=${DEVKITS_URI}")
+            }
             stage("Build Ubuntu 18.04 Full Docker Image") {
                 oefull1804 = oe.dockerImage("oetools-full-18.04:${DOCKER_TAG}", ".jenkins/infrastructure/dockerfiles/Dockerfile.full", "${buildArgs} --build-arg ubuntu_version=18.04 --build-arg devkits_uri=${DEVKITS_URI}")
                 puboefull1804 = oe.dockerImage("oeciteam/oetools-full-18.04:${DOCKER_TAG}", ".jenkins/infrastructure/dockerfiles/Dockerfile.full", "${buildArgs} --build-arg ubuntu_version=18.04 --build-arg devkits_uri=${DEVKITS_URI}")
@@ -33,10 +37,12 @@ def buildDockerImages() {
             }
             stage("Push to OE Docker Registry") {
                 docker.withRegistry(OETOOLS_REPO, OETOOLS_REPO_CREDENTIAL_ID) {
+                    oe.exec_with_retry { oefull2004.push() }
                     oe.exec_with_retry { oefull1804.push() }
                     oe.exec_with_retry { oeminimal1804.push() }
                     oe.exec_with_retry { oeDeploy.push() }
                     if(TAG_LATEST == "true") {
+                        oe.exec_with_retry { oefull2004.push('latest') }
                         oe.exec_with_retry { oefull1804.push('latest') }
                         oe.exec_with_retry { oeminimal1804.push('latest') }
                         oe.exec_with_retry { oeDeploy.push('latest') }
@@ -46,9 +52,11 @@ def buildDockerImages() {
             stage("Push to OE Docker Hub Registry") {
                 docker.withRegistry('', OETOOLS_DOCKERHUB_REPO_CREDENTIAL_ID) {
                     if(TAG_LATEST == "true") {
+                        oe.exec_with_retry { puboefull2004.push() }
                         oe.exec_with_retry { puboefull1804.push() }
                         oe.exec_with_retry { puboeminimal1804.push() }
                         oe.exec_with_retry { puboeDeploy.push() }
+                        oe.exec_with_retry { puboefull2004.push('latest') }
                         oe.exec_with_retry { puboefull1804.push('latest') }
                         oe.exec_with_retry { puboeminimal1804.push('latest') }
                         oe.exec_with_retry { puboeDeploy.push('latest') }
