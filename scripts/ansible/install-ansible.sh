@@ -4,6 +4,7 @@
 # Licensed under the MIT License.
 
 set -o errexit
+set -x
 
 DIR=$(dirname "$0")
 
