@@ -31,7 +31,7 @@ def simulationContainerTest(String version, String build_type, List extra_cmake_
                            ctest --output-on-failure --timeout ${CTEST_TIMEOUT_SECONDS}
                            """
                 withEnv(["OE_SIMULATION=1"]) {
-                    oe.ContainerRun("oetools-full-${version}:${DOCKER_TAG}", "clang-8", task, "--cap-add=SYS_PTRACE")
+                    oe.ContainerRun("oetools-full-${version}:${DOCKER_TAG}", "clang-8", task, "--cap-add=SYS_PTRACE --entrypoint ''")
                 }
             }
         }
@@ -54,7 +54,7 @@ def AArch64GNUTest(String version, String build_type) {
                                 -Wdev
                             ninja -v
                             """
-                oe.ContainerRun("oetools-full-${version}:${DOCKER_TAG}", "cross", task, "--cap-add=SYS_PTRACE")
+                oe.ContainerRun("oetools-full-${version}:${DOCKER_TAG}", "cross", task, "--cap-add=SYS_PTRACE --entrypoint ''")
             }
         }
     }
@@ -70,7 +70,7 @@ def checkDevFlows(String version) {
                            cmake ${WORKSPACE} -G Ninja -DHAS_QUOTE_PROVIDER=OFF -Wdev --warn-uninitialized -Werror=dev
                            ninja -v
                            """
-                oe.ContainerRun("oetools-full-${version}:${DOCKER_TAG}", "clang-8", task, "--cap-add=SYS_PTRACE")
+                oe.ContainerRun("oetools-full-${version}:${DOCKER_TAG}", "clang-8", task, "--cap-add=SYS_PTRACE --entrypoint ''")
             }
         }
     }
