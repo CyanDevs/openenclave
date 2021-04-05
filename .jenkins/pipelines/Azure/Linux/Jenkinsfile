@@ -112,7 +112,7 @@ def ACCContainerTest(String label, String version, List extra_cmake_args = []) {
                            ninja -v
                            ctest --output-on-failure --timeout ${CTEST_TIMEOUT_SECONDS}
                            """
-                oe.ContainerRun("oetools-full-${version}:${DOCKER_TAG}", "clang-8", task, "--cap-add=SYS_PTRACE --device /dev/sgx:/dev/sgx")
+                oe.ContainerRun("oetools-full-${version}:${DOCKER_TAG}", "clang-8", task, "--cap-add=SYS_PTRACE --device /dev/sgx/provision:/dev/sgx/provision --device /dev/sgx/enclave:/dev/sgx/enclave -v /var/run/aesmd/aesm.socket:/var/run/aesmd/aesm.socket")
             }
         }
     }
@@ -151,7 +151,7 @@ def ACCPackageTest(String label, String version, List extra_cmake_args = []) {
                                fi
                            done
                            """
-                oe.ContainerRun("oetools-full-${version}:${DOCKER_TAG}", "clang-8", task, "--cap-add=SYS_PTRACE --device /dev/sgx:/dev/sgx")
+                oe.ContainerRun("oetools-full-${version}:${DOCKER_TAG}", "clang-8", task, "--cap-add=SYS_PTRACE --device /dev/sgx/provision:/dev/sgx/provision --device /dev/sgx/enclave:/dev/sgx/enclave -v /var/run/aesmd/aesm.socket:/var/run/aesmd/aesm.socket")
             }
         }
     }
@@ -182,7 +182,7 @@ def ACCHostVerificationTest(String version, String build_type) {
                            ../../tools/oecert/host/oecert ../../tools/oecert/enc/oecert_enc --evidence --out sgx_evidence.bin --endorsements sgx_endorsements.bin
                            popd
                            """
-                oe.ContainerRun("oetools-full-${version}:${DOCKER_TAG}", "clang-8", task, "--cap-add=SYS_PTRACE --device /dev/sgx:/dev/sgx")
+                oe.ContainerRun("oetools-full-${version}:${DOCKER_TAG}", "clang-8", task, "--cap-add=SYS_PTRACE --device /dev/sgx/provision:/dev/sgx/provision --device /dev/sgx/enclave:/dev/sgx/enclave -v /var/run/aesmd/aesm.socket:/var/run/aesmd/aesm.socket")
 
                 def ec_cert_created = fileExists 'build/tests/host_verify/host/sgx_cert_ec.der'
                 def rsa_cert_created = fileExists 'build/tests/host_verify/host/sgx_cert_rsa.der'
@@ -277,7 +277,7 @@ def ACCHostVerificationPackageTest(String version, String build_type) {
                            ../../tools/oecert/host/oecert ../../tools/oecert/enc/oecert_enc --evidence --out sgx_evidence.bin --endorsements sgx_endorsements.bin
                            popd
                            """
-                oe.ContainerRun("oetools-full-${version}:${DOCKER_TAG}", "clang-8", task, "--cap-add=SYS_PTRACE --device /dev/sgx:/dev/sgx")
+                oe.ContainerRun("oetools-full-${version}:${DOCKER_TAG}", "clang-8", task, "--cap-add=SYS_PTRACE --device /dev/sgx/provision:/dev/sgx/provision --device /dev/sgx/enclave:/dev/sgx/enclave -v /var/run/aesmd/aesm.socket:/var/run/aesmd/aesm.socket")
 
                 def ec_cert_created = fileExists 'build/tests/host_verify/host/sgx_cert_ec.der'
                 def rsa_cert_created = fileExists 'build/tests/host_verify/host/sgx_cert_rsa.der'
