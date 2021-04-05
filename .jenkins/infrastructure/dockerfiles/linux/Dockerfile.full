@@ -78,3 +78,9 @@ RUN echo "${UNAME} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 # Setup devkit
 RUN curl ${devkits_uri} | tar xvz --no-same-permissions --no-same-owner
 RUN echo ${devkits_uri##*/} > /devkits/TARBALL
+
+# Set up out-of-proc attestation
+RUN groupadd sgx_prv
+RUN usermod -aG sgx_prv ${UNAME}
+ENV SGX_AESM_ADDR=1
+ENTRYPOINT sudo chgrp sgx_prv /dev/sgx/provision && /bin/bash
