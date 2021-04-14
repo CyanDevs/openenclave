@@ -25,7 +25,6 @@ def ACCCodeCoverageTest(String label, String compiler, String build_type) {
                 cleanWs()
                 checkout scm
                 def task = """
-                           newgrp sgx_prv << EOF
                            cmake ${WORKSPACE}                                           \
                                -G Ninja                                                 \
                                -DCODE_COVERAGE=ON                                       \
@@ -35,8 +34,6 @@ def ACCCodeCoverageTest(String label, String compiler, String build_type) {
                            ninja -v
                            ctest --output-on-failure --timeout ${CTEST_TIMEOUT_SECONDS}
                            ninja code_coverage
-# Purposely unintended so bash reads the EOF
-EOF
                            """
                 oe.Run(compiler, task)
 
@@ -80,7 +77,6 @@ def ACCTest(String label, String compiler, String build_type, List extra_cmake_a
                         """
                 }
                 def task = """
-                           newgrp sgx_prv << EOF
                            cmake ${WORKSPACE}                                           \
                                -G Ninja                                                 \
                                -DCMAKE_BUILD_TYPE=${build_type}                         \
@@ -89,8 +85,6 @@ def ACCTest(String label, String compiler, String build_type, List extra_cmake_a
                                -Wdev
                            ninja -v
                            ctest --output-on-failure --timeout ${CTEST_TIMEOUT_SECONDS}
-# Purposely unintended so bash reads the EOF
-EOF
                            """
                 withEnv(test_env) {
                     oe.Run(compiler, task)
@@ -117,7 +111,7 @@ def ACCContainerTest(String label, String version, List extra_cmake_args = []) {
                            ninja -v
                            ctest --output-on-failure --timeout ${CTEST_TIMEOUT_SECONDS}
                            """
-                oe.ContainerRun("oetools-full-${version}:${DOCKER_TAG}", "clang-8", task, "--cap-add=SYS_PTRACE --device /dev/sgx/provision:/dev/sgx/provision --device /dev/sgx/enclave:/dev/sgx/enclave -v /var/run/aesmd/aesm.socket:/var/run/aesmd/aesm.socket")
+                oe.ContainerRun("oetools-full-${version}:${DOCKER_TAG}", "clang-8", task, "--cap-add=SYS_PTRACE --device /dev/sgx:/dev/sgx --volume /var/run/aesmd/aesm.socket:/var/run/aesmd/aesm.socket")
             }
         }
     }
@@ -156,7 +150,7 @@ def ACCPackageTest(String label, String version, List extra_cmake_args = []) {
                                fi
                            done
                            """
-                oe.ContainerRun("oetools-full-${version}:${DOCKER_TAG}", "clang-8", task, "--cap-add=SYS_PTRACE --device /dev/sgx/provision:/dev/sgx/provision --device /dev/sgx/enclave:/dev/sgx/enclave -v /var/run/aesmd/aesm.socket:/var/run/aesmd/aesm.socket")
+                oe.ContainerRun("oetools-full-${version}:${DOCKER_TAG}", "clang-8", task, "--cap-add=SYS_PTRACE --device /dev/sgx:/dev/sgx --volume /var/run/aesmd/aesm.socket:/var/run/aesmd/aesm.socket")
             }
         }
     }
@@ -187,7 +181,7 @@ def ACCHostVerificationTest(String version, String build_type) {
                            ../../tools/oecert/oecert --evidence --out sgx_evidence.bin --endorsements sgx_endorsements.bin --verify
                            popd
                            """
-                oe.ContainerRun("oetools-full-${version}:${DOCKER_TAG}", "clang-8", task, "--cap-add=SYS_PTRACE --device /dev/sgx/provision:/dev/sgx/provision --device /dev/sgx/enclave:/dev/sgx/enclave -v /var/run/aesmd/aesm.socket:/var/run/aesmd/aesm.socket")
+                oe.ContainerRun("oetools-full-${version}:${DOCKER_TAG}", "clang-8", task, "--cap-add=SYS_PTRACE --device /dev/sgx:/dev/sgx --volume /var/run/aesmd/aesm.socket:/var/run/aesmd/aesm.socket")
 
                 def ec_cert_created = fileExists 'build/tests/host_verify/host/sgx_cert_ec.der'
                 def rsa_cert_created = fileExists 'build/tests/host_verify/host/sgx_cert_rsa.der'
@@ -232,7 +226,7 @@ def ACCHostVerificationTest(String version, String build_type) {
                            ctest -R host_verify --output-on-failure --timeout ${CTEST_TIMEOUT_SECONDS}
                            """
                 // Note: Include the commands to build and run the quote verification test above
-                oe.ContainerRun("oetools-full-${version}:${DOCKER_TAG}", "clang-8", task, "--cap-add=SYS_PTRACE --entrypoint ''")
+                oe.ContainerRun("oetools-full-${version}:${DOCKER_TAG}", "clang-8", task, "--cap-add=SYS_PTRACE")
             }
         }
     }
@@ -282,7 +276,7 @@ def ACCHostVerificationPackageTest(String version, String build_type) {
                            ../../tools/oecert/oecert --evidence --out sgx_evidence.bin --endorsements sgx_endorsements.bin --verify
                            popd
                            """
-                oe.ContainerRun("oetools-full-${version}:${DOCKER_TAG}", "clang-8", task, "--cap-add=SYS_PTRACE --device /dev/sgx/provision:/dev/sgx/provision --device /dev/sgx/enclave:/dev/sgx/enclave -v /var/run/aesmd/aesm.socket:/var/run/aesmd/aesm.socket")
+                oe.ContainerRun("oetools-full-${version}:${DOCKER_TAG}", "clang-8", task, "--cap-add=SYS_PTRACE --device /dev/sgx:/dev/sgx --volume /var/run/aesmd/aesm.socket:/var/run/aesmd/aesm.socket")
 
                 def ec_cert_created = fileExists 'build/tests/host_verify/host/sgx_cert_ec.der'
                 def rsa_cert_created = fileExists 'build/tests/host_verify/host/sgx_cert_rsa.der'
@@ -345,7 +339,7 @@ def ACCHostVerificationPackageTest(String version, String build_type) {
                            popd
                            """
                 // Note: Include the commands to build and run the quote verification test above
-                oe.ContainerRun("oetools-full-${version}:${DOCKER_TAG}", "clang-8", task, "--cap-add=SYS_PTRACE --entrypoint ''")
+                oe.ContainerRun("oetools-full-${version}:${DOCKER_TAG}", "clang-8", task, "--cap-add=SYS_PTRACE")
             }
         }
     }

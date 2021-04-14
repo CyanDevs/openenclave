@@ -47,15 +47,9 @@
 # https://ms.portal.azure.com/#@microsoft.onmicrosoft.com/resource/subscriptions/e5839dfd-61f0-4b2f-b06f-de7fc47b5998/resourceGroups/OE-Jenkins-CI/providers/Microsoft.ContainerRegistry/registries/oejenkinscidockerregistry/overview
 #
 # This image includes out-of-proc attestation using Intel SGX by default.
-# Therefore the image requires 2 devices by the Intel SGX Driver for Ubuntu:
-#   1) /dev/sgx/provision
-#   2) /dev/sgx/enclave
-# In addition, the Intel SGX AESM Service will need to be made available by mounting:
-#   /var/run/aesmd/aesm.socket
-# Taken together, this image needs to be ran with the following additional parameters:
-#   --device /dev/sgx/provision:/dev/sgx/provision --device /dev/sgx/enclave:/dev/sgx/enclave --volume /var/run/aesmd/aesm.socket:/var/run/aesmd/aesm.socket
-# If you do not need Intel SGX, you can run this image by overriding the container entrypoint by specifying:
-#   --entrypoint ""
+# To allow this, the Intel SGX AESM Service will need to be made available by creating the container with the following parameter:
+#   --volume /var/run/aesmd/aesm.socket:/var/run/aesmd/aesm.socket
+# 
 
 ARG ubuntu_version=18.04
 
@@ -91,9 +85,4 @@ RUN curl ${devkits_uri} | tar xvz --no-same-permissions --no-same-owner
 RUN echo ${devkits_uri##*/} > /devkits/TARBALL
 
 # Set up out-of-proc attestation
-RUN groupadd sgx_prv
-RUN usermod -aG sgx_prv ${UNAME}
 ENV SGX_AESM_ADDR=1
-ENTRYPOINT sudo chgrp sgx_prv /dev/sgx/provision && \
-           newgrp sgx_prv && \
-           /bin/bash
