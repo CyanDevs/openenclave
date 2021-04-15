@@ -61,6 +61,7 @@ def buildLinuxManagedImage(String os_type, String version) {
             }
             stage("${os_type}-${version}-build") {
                 timeout(GLOBAL_TIMEOUT_MINUTES) {
+                    checkout scm
                     withCredentials([usernamePassword(credentialsId: OETOOLS_REPO_CREDENTIALS_ID,
                                                     usernameVariable: "DOCKER_USER_NAME",
                                                     passwordVariable: "DOCKER_USER_PASSWORD"),
