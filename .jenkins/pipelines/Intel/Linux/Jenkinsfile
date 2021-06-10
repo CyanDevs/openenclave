@@ -3,8 +3,18 @@
 
 GLOBAL_ERROR = null
 
+properties(
+    [
+        parameters(
+            [
+                string(name: 'PULL_NUMBER', defaultValue: 'master')
+            ]
+        )
+    ]
+)
+
 AGENTS_LABELS = [
-    "ubuntu-nonsgx":            env.UBUNTU_NONSGX_CUSTOM_LABEL ?: "nonSGX-ubuntu-2004",
+    "ubuntu-nonsgx": env.UBUNTU_NONSGX_CUSTOM_LABEL ?: "nonSGX-ubuntu-2004",
 ]
 
 // This job uses a backend API to call and trigger jobs behind Intel's firewall through a webpoller, 
@@ -24,7 +34,7 @@ def TriggerIntelJob(String jobname) {
                 image.pull()
                 image.inside() {
                     dir("${WORKSPACE}") {
-                        sh "python3 /scripts/intel/jenkins_trigger.py --job Pipelines/job/${jobname} --jenkins-user ${JENKINS_USER} --url ${INTEL_URL} --jenkins-password ${INTEL_TOKEN} --sleep 60"
+                        sh "python3 /scripts/intel/jenkins_trigger.py --job Pipelines/job/${jobname} --jenkins-user ${JENKINS_USER} --url ${INTEL_URL} --jenkins-password ${INTEL_TOKEN} --parameters PULL_NUMBER=${PULL_NUMBER} --sleep 60"
                     }
                 }
             }
@@ -39,7 +49,8 @@ try{
     if(FULL_TEST_SUITE == "true") {
         def testing_stages = [
         "Intel Agnostic-SGX-FLC-Linux ":                { TriggerIntelJob('Agnostic-SGX-FLC-Linux')},
-        "Intel Agnostic-SGX1-Linux ":                   { TriggerIntelJob('Agnostic-SGX1-Linux')}
+        "Intel Agnostic-SGX1-Linux ":                   { TriggerIntelJob('Agnostic-SGX1-Linux')},
+        "Intel OpenEnclave-TestInfra":                  { TriggerIntelJob('OpenEnclave-TestInfra')}
         ]
         parallel testing_stages
     }
