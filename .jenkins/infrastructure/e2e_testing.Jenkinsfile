@@ -65,6 +65,7 @@ stage("Run tests on new Agents") {
     build job: '/CI-CD_Infrastructure/OpenEnclave-Testing',
           parameters: [string(name: 'REPOSITORY_NAME', value: env.REPOSITORY),
                        string(name: 'BRANCH_NAME', value: env.BRANCH),
+                       booleanParam(name: 'FORCE_TEST', value: true),
                        string(name: 'DOCKER_TAG', value: DOCKER_TAG),
                        string(name: 'OECI_LIB_VERSION', value: OECI_LIB_VERSION),
                        string(name: 'UBUNTU_1804_CUSTOM_LABEL', value: env.UBUNTU_1804_LABEL),

@@ -12,6 +12,7 @@ REPOSITORY_NAME = env.REPOSITORY_NAME ?: "openenclave/openenclave"
 BRANCH_NAME = env.BRANCH_NAME ?: "master"
 DOCKER_TAG = env.DOCKER_TAG ?: "latest"
 FULL_TEST_SUITE = env.FULL_TEST_SUITE ?: false
+FORCE_TEST = env.FORCE_TEST ?: false
 // Regex that includes directory you want to ignore for CI builds.
 String IGNORED_DIRS = "^(docs|\\.jenkins/infrastructure)|\\.md\$"
 
@@ -55,11 +56,12 @@ stage("Compare changes") {
 }
 
 // Skip build with a success if gitChanges is defined and empty (no changes outside of ignored directories).
-if (gitChanges != null && gitChanges == '') {
+if (gitChanges != null && gitChanges == '' && !FORCE_TEST) {
     currentBuild.result = 'SUCCESS'
     return
 } else {
     println("Detected the follow file changes: " + gitChanges)
+    println("Force test: " + FORCE_TEST)
 }
 
 try {
