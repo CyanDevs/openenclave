@@ -103,7 +103,6 @@ add_enclave_library(
   stdlib.c
   strerror.c
   syscalls.c
-  sysconf.c
   regcomp.c
   regexec.c
   tre-mem.c
@@ -118,13 +117,20 @@ add_enclave_library(
   ${MUSLSRC}/complex/cabs.c
   ${MUSLSRC}/complex/cabsf.c
   ${MUSLSRC}/complex/cabsl.c
+  ${MUSLSRC}/complex/cacos.c
   ${MUSLSRC}/complex/cacosf.c
+  ${MUSLSRC}/complex/cacosh.c
   ${MUSLSRC}/complex/cacoshf.c
+  ${MUSLSRC}/complex/cacoshl.c
+  ${MUSLSRC}/complex/cacosl.c
   ${MUSLSRC}/complex/carg.c
   ${MUSLSRC}/complex/cargf.c
   ${MUSLSRC}/complex/cargl.c
+  ${MUSLSRC}/complex/casin.c
   ${MUSLSRC}/complex/casinf.c
+  ${MUSLSRC}/complex/casinh.c
   ${MUSLSRC}/complex/casinhf.c
+  ${MUSLSRC}/complex/casinhl.c
   ${MUSLSRC}/complex/catan.c
   ${MUSLSRC}/complex/catanf.c
   ${MUSLSRC}/complex/catanh.c
@@ -151,6 +157,9 @@ add_enclave_library(
   ${MUSLSRC}/complex/conj.c
   ${MUSLSRC}/complex/conjf.c
   ${MUSLSRC}/complex/conjl.c
+  ${MUSLSRC}/complex/cpow.c
+  ${MUSLSRC}/complex/cpowf.c
+  ${MUSLSRC}/complex/cpowl.c
   ${MUSLSRC}/complex/cproj.c
   ${MUSLSRC}/complex/cprojf.c
   ${MUSLSRC}/complex/cprojl.c
@@ -163,13 +172,20 @@ add_enclave_library(
   ${MUSLSRC}/complex/csinhf.c
   ${MUSLSRC}/complex/csinhl.c
   ${MUSLSRC}/complex/csinl.c
+  ${MUSLSRC}/complex/csqrt.c
   ${MUSLSRC}/complex/csqrtf.c
+  ${MUSLSRC}/complex/csqrtl.c
   ${MUSLSRC}/complex/ctan.c
   ${MUSLSRC}/complex/ctanf.c
   ${MUSLSRC}/complex/ctanh.c
   ${MUSLSRC}/complex/ctanhf.c
   ${MUSLSRC}/complex/ctanhl.c
   ${MUSLSRC}/complex/ctanl.c
+  ${MUSLSRC}/conf/confstr.c
+  ${MUSLSRC}/conf/fpathconf.c
+  ${MUSLSRC}/conf/legacy.c
+  ${MUSLSRC}/conf/pathconf.c
+  ${MUSLSRC}/conf/sysconf.c
   ${MUSLSRC}/ctype/__ctype_b_loc.c
   ${MUSLSRC}/ctype/__ctype_get_mb_cur_max.c
   ${MUSLSRC}/ctype/__ctype_tolower_loc.c
@@ -259,9 +275,10 @@ add_enclave_library(
   ${MUSLSRC}/locale/wcscoll.c
   ${MUSLSRC}/locale/wcsxfrm.c
   ${MUSLSRC}/linux/getrandom.c
-  ${MUSLSRC}/linux/mount.c
   ${MUSLSRC}/linux/epoll.c
   ${MUSLSRC}/linux/flock.c
+  ${MUSLSRC}/linux/mount.c
+  ${MUSLSRC}/linux/sysinfo.c
   ${MUSLSRC}/math/__math_divzero.c
   ${MUSLSRC}/math/__math_divzerof.c
   ${MUSLSRC}/math/__math_invalid.c
@@ -489,6 +506,7 @@ add_enclave_library(
   ${MUSLSRC}/misc/basename.c
   ${MUSLSRC}/misc/dirname.c
   ${MUSLSRC}/misc/getdomainname.c
+  ${MUSLSRC}/misc/getrlimit.c
   ${MUSLSRC}/misc/ioctl.c
   ${MUSLSRC}/misc/nftw.c
   ${MUSLSRC}/misc/uname.c
@@ -800,22 +818,32 @@ add_enclave_library(
   ${MUSLSRC}/temp/__randname.c
   ${MUSLSRC}/thread/__lock.c
   ${MUSLSRC}/thread/__wait.c
+  ${MUSLSRC}/time/asctime.c
+  ${MUSLSRC}/time/asctime_r.c
   ${MUSLSRC}/time/clock_gettime.c
   ${MUSLSRC}/time/clock_nanosleep.c
+  ${MUSLSRC}/time/ctime.c
+  ${MUSLSRC}/time/ctime_r.c
   ${MUSLSRC}/time/difftime.c
+  ${MUSLSRC}/time/ftime.c
   ${MUSLSRC}/time/gettimeofday.c
   ${MUSLSRC}/time/gmtime.c
   ${MUSLSRC}/time/gmtime_r.c
+  ${MUSLSRC}/time/localtime_r.c
+  ${MUSLSRC}/time/localtime.c
   ${MUSLSRC}/time/__map_file.c
-  ${MUSLSRC}/time/__month_to_secs.c
   ${MUSLSRC}/time/mktime.c
+  ${MUSLSRC}/time/__month_to_secs.c
   ${MUSLSRC}/time/nanosleep.c
   ${MUSLSRC}/time/__secs_to_tm.c
   ${MUSLSRC}/time/strftime.c
-  ${MUSLSRC}/time/__tz.c
+  ${MUSLSRC}/time/strptime.c
   ${MUSLSRC}/time/time.c
   ${MUSLSRC}/time/timegm.c
+  ${MUSLSRC}/time/timespec_get.c
   ${MUSLSRC}/time/__tm_to_secs.c
+  ${MUSLSRC}/time/__tz.c
+  ${MUSLSRC}/time/wcsftime.c
   ${MUSLSRC}/time/__year_to_secs.c
   ${MUSLSRC}/unistd/access.c
   ${MUSLSRC}/unistd/chdir.c
@@ -927,10 +955,8 @@ if (OE_SGX)
     ${MUSLSRC}/string/x86_64/memset.s
     ${MUSLSRC}/stdlib/qsort.c)
 
-  set_property(
-    SOURCE ${DEFAULT_VISIBILITY}
-    APPEND_STRING
-    PROPERTY COMPILE_FLAGS " -fvisibility=default")
+  set_property(SOURCE ${DEFAULT_VISIBILITY} APPEND_STRING
+               PROPERTY COMPILE_FLAGS " -fvisibility=default")
 endif ()
 
 enclave_compile_definitions(oelibc PRIVATE _XOPEN_SOURCE=700)
