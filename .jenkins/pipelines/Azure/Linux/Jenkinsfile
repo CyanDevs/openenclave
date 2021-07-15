@@ -1,5 +1,6 @@
 // Copyright (c) Open Enclave SDK contributors.
 // Licensed under the MIT License.
+import io.jenkins.blueocean.rest.impl.pipeline.*
 
 OECI_LIB_VERSION = env.OECI_LIB_VERSION ?: "master"
 oe = library("OpenEnclaveCommon@${OECI_LIB_VERSION}").jenkins.common.Openenclave.new()
@@ -493,26 +494,41 @@ host_verification_package_tests = [
     "Host verification package 1804 RelWithDebInfo":    { ACCHostVerificationPackageTest('18.04', 'RelWithDebInfo') },
     "Host verification package 1804 Debug":             { ACCHostVerificationPackageTest('18.04', 'Debug') }
 ]
-eeid_tests = [
-    "ACC1804 clang-10 RelWithDebInfo EEID Experimental LVI FULL Tests": { ACCTest(AGENTS_LABELS["acc-ubuntu-18.04"], 'clang-10', 'RelWithDebInfo', ['-DLVI_MITIGATION=ControlFlow', '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DWITH_EEID=ON']) }
+eeid_fast_tests = [
+    "ACC2004 clang-10 RelWithDebInfo EEID LVI":    { ACCTest(AGENTS_LABELS["acc-ubuntu-20.04"], 'clang-10', 'RelWithDebInfo', ['-DLVI_MITIGATION=ControlFlow', '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DWITH_EEID=ON']) },
+    "ACC1804 clang-10 RelWithDebInfo EEID LVI":    { ACCTest(AGENTS_LABELS["acc-ubuntu-18.04"], 'clang-10', 'RelWithDebInfo', ['-DLVI_MITIGATION=ControlFlow', '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DWITH_EEID=ON']) }
 ]
-package_tests = [
-    "ACC2004 Package RelWithDebInfo Full":              { ACCPackageTest(AGENTS_LABELS["acc-ubuntu-20.04"], '20.04', ['-DLVI_MITIGATION=None',        '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=OFF']) },
-    "ACC2004 Package RelWithDebInfo LVI Full":          { ACCPackageTest(AGENTS_LABELS["acc-ubuntu-20.04"], '20.04', ['-DLVI_MITIGATION=ControlFlow', '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=OFF']) },
+eeid_full_tests = [
+    "ACC2004 clang-10 RelWithDebInfo EEID LVI Full":    { ACCTest(AGENTS_LABELS["acc-ubuntu-20.04"], 'clang-10', 'RelWithDebInfo', ['-DLVI_MITIGATION=ControlFlow', '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DWITH_EEID=ON']) },
+    "ACC1804 clang-10 RelWithDebInfo EEID LVI Full":    { ACCTest(AGENTS_LABELS["acc-ubuntu-18.04"], 'clang-10', 'RelWithDebInfo', ['-DLVI_MITIGATION=ControlFlow', '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DWITH_EEID=ON']) }
+]
+package_fast_tests = [
+    "ACC2004 Package RelWithDebInfo":                   { ACCPackageTest(AGENTS_LABELS["acc-ubuntu-20.04"], '20.04', ['-DLVI_MITIGATION=None',        '-DLVI_MITIGATION_SKIP_TESTS=ON',  '-DUSE_SNMALLOC=OFF']) },
     "ACC2004 Package RelWithDebInfo LVI":               { ACCPackageTest(AGENTS_LABELS["acc-ubuntu-20.04"], '20.04', ['-DLVI_MITIGATION=ControlFlow', '-DLVI_MITIGATION_SKIP_TESTS=ON',  '-DUSE_SNMALLOC=OFF']) },
-    "ACC2004 Package RelWithDebInfo LVI snmalloc Full": { ACCPackageTest(AGENTS_LABELS["acc-ubuntu-20.04"], '20.04', ['-DLVI_MITIGATION=ControlFlow', '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=ON' ]) },
-    "ACC1804 Package RelWithDebInfo Full":              { ACCPackageTest(AGENTS_LABELS["acc-ubuntu-18.04"], '18.04', ['-DLVI_MITIGATION=None',        '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=OFF']) },
-    "ACC1804 Package RelWithDebInfo LVI Full":          { ACCPackageTest(AGENTS_LABELS["acc-ubuntu-18.04"], '18.04', ['-DLVI_MITIGATION=ControlFlow', '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=OFF']) },
+    "ACC2004 Package RelWithDebInfo LVI snmalloc":      { ACCPackageTest(AGENTS_LABELS["acc-ubuntu-20.04"], '20.04', ['-DLVI_MITIGATION=ControlFlow', '-DLVI_MITIGATION_SKIP_TESTS=ON',  '-DUSE_SNMALLOC=ON' ]) },
+    "ACC1804 Package RelWithDebInfo":                   { ACCPackageTest(AGENTS_LABELS["acc-ubuntu-18.04"], '18.04', ['-DLVI_MITIGATION=None',        '-DLVI_MITIGATION_SKIP_TESTS=ON',  '-DUSE_SNMALLOC=OFF']) },
     "ACC1804 Package RelWithDebInfo LVI":               { ACCPackageTest(AGENTS_LABELS["acc-ubuntu-18.04"], '18.04', ['-DLVI_MITIGATION=ControlFlow', '-DLVI_MITIGATION_SKIP_TESTS=ON',  '-DUSE_SNMALLOC=OFF']) },
-    "ACC1804 Package RelWithDebInfo LVI snmalloc Full": { ACCPackageTest(AGENTS_LABELS["acc-ubuntu-18.04"], '18.04', ['-DLVI_MITIGATION=ControlFlow', '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=ON' ]) }
+    "ACC1804 Package RelWithDebInfo LVI snmalloc":      { ACCPackageTest(AGENTS_LABELS["acc-ubuntu-18.04"], '18.04', ['-DLVI_MITIGATION=ControlFlow', '-DLVI_MITIGATION_SKIP_TESTS=ON',  '-DUSE_SNMALLOC=ON' ]) }
 ]
-container_tests = [
-    "ACC2004 Container RelWithDebInfo":                 { ACCContainerTest(AGENTS_LABELS["acc-ubuntu-20.04"], '20.04', ['-DLVI_MITIGATION=None',        '-DLVI_MITIGATION_SKIP_TESTS=OFF']) },
-    "ACC2004 Container RelWithDebInfo LVI Full":        { ACCContainerTest(AGENTS_LABELS["acc-ubuntu-20.04"], '20.04', ['-DLVI_MITIGATION=ControlFlow', '-DLVI_MITIGATION_SKIP_TESTS=OFF']) },
-    "ACC2004 Container RelWithDebInfo LVI":             { ACCContainerTest(AGENTS_LABELS["acc-ubuntu-20.04"], '20.04', ['-DLVI_MITIGATION=ControlFlow', '-DLVI_MITIGATION_SKIP_TESTS=ON' ]) },
-    "ACC1804 Container RelWithDebInfo":                 { ACCContainerTest(AGENTS_LABELS["acc-ubuntu-18.04"], '18.04', ['-DLVI_MITIGATION=None',        '-DLVI_MITIGATION_SKIP_TESTS=OFF']) },
-    "ACC1804 Container RelWithDebInfo LVI Full":        { ACCContainerTest(AGENTS_LABELS["acc-ubuntu-18.04"], '18.04', ['-DLVI_MITIGATION=ControlFlow', '-DLVI_MITIGATION_SKIP_TESTS=OFF']) },
-    "ACC1804 Container RelWithDebInfo LVI":             { ACCContainerTest(AGENTS_LABELS["acc-ubuntu-18.04"], '18.04', ['-DLVI_MITIGATION=ControlFlow', '-DLVI_MITIGATION_SKIP_TESTS=ON' ]) }
+package_full_tests = [
+    "ACC2004 Package RelWithDebInfo Full":                   { ACCPackageTest(AGENTS_LABELS["acc-ubuntu-20.04"], '20.04', ['-DLVI_MITIGATION=None',        '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=OFF']) },
+    "ACC2004 Package RelWithDebInfo Full LVI":               { ACCPackageTest(AGENTS_LABELS["acc-ubuntu-20.04"], '20.04', ['-DLVI_MITIGATION=ControlFlow', '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=OFF']) },
+    "ACC2004 Package RelWithDebInfo Full LVI snmalloc":      { ACCPackageTest(AGENTS_LABELS["acc-ubuntu-20.04"], '20.04', ['-DLVI_MITIGATION=ControlFlow', '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=ON' ]) },
+    "ACC1804 Package RelWithDebInfo Full":                   { ACCPackageTest(AGENTS_LABELS["acc-ubuntu-18.04"], '18.04', ['-DLVI_MITIGATION=None',        '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=OFF']) },
+    "ACC1804 Package RelWithDebInfo Full LVI":               { ACCPackageTest(AGENTS_LABELS["acc-ubuntu-18.04"], '18.04', ['-DLVI_MITIGATION=ControlFlow', '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=OFF']) },
+    "ACC1804 Package RelWithDebInfo Full LVI snmalloc":      { ACCPackageTest(AGENTS_LABELS["acc-ubuntu-18.04"], '18.04', ['-DLVI_MITIGATION=ControlFlow', '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=ON' ]) }
+]
+container_fast_tests = [
+    "ACC2004 Container RelWithDebInfo":                 { ACCContainerTest(AGENTS_LABELS["acc-ubuntu-20.04"], '20.04', ['-DLVI_MITIGATION=None',        '-DLVI_MITIGATION_SKIP_TESTS=ON']) },
+    "ACC2004 Container RelWithDebInfo LVI":             { ACCContainerTest(AGENTS_LABELS["acc-ubuntu-20.04"], '20.04', ['-DLVI_MITIGATION=ControlFlow', '-DLVI_MITIGATION_SKIP_TESTS=ON']) },
+    "ACC1804 Container RelWithDebInfo":                 { ACCContainerTest(AGENTS_LABELS["acc-ubuntu-18.04"], '18.04', ['-DLVI_MITIGATION=None',        '-DLVI_MITIGATION_SKIP_TESTS=ON']) },
+    "ACC1804 Container RelWithDebInfo LVI":             { ACCContainerTest(AGENTS_LABELS["acc-ubuntu-18.04"], '18.04', ['-DLVI_MITIGATION=ControlFlow', '-DLVI_MITIGATION_SKIP_TESTS=ON']) }
+]
+container_full_tests = [
+    "ACC2004 Container RelWithDebInfo Full":                 { ACCContainerTest(AGENTS_LABELS["acc-ubuntu-20.04"], '20.04', ['-DLVI_MITIGATION=None',        '-DLVI_MITIGATION_SKIP_TESTS=OFF']) },
+    "ACC2004 Container RelWithDebInfo Full LVI":             { ACCContainerTest(AGENTS_LABELS["acc-ubuntu-20.04"], '20.04', ['-DLVI_MITIGATION=ControlFlow', '-DLVI_MITIGATION_SKIP_TESTS=OFF']) },
+    "ACC1804 Container RelWithDebInfo Full":                 { ACCContainerTest(AGENTS_LABELS["acc-ubuntu-18.04"], '18.04', ['-DLVI_MITIGATION=None',        '-DLVI_MITIGATION_SKIP_TESTS=OFF']) },
+    "ACC1804 Container RelWithDebInfo Full LVI":             { ACCContainerTest(AGENTS_LABELS["acc-ubuntu-18.04"], '18.04', ['-DLVI_MITIGATION=ControlFlow', '-DLVI_MITIGATION_SKIP_TESTS=OFF']) }
 ]
 e2e_tests = [
     //                                                                          | Operating System           | Compiler  | Build Type       | LVI Mitigation                | LVI Mitigation Skip Tests        | SNMALLOC                 | E2E      
@@ -526,38 +542,49 @@ e2e_tests = [
     "ACC1804 clang-10 Debug LVI e2e snmalloc":          { ACCTest(AGENTS_LABELS["acc-ubuntu-18.04-vanilla"], 'clang-10', 'Debug',          ['-DLVI_MITIGATION=ControlFlow', '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=ON' ], [], true) },
 ]
 code_coverage_tests = [
-    "ACC1804 Code Coverage Test": { ACCCodeCoverageTest(AGENTS_LABELS["acc-ubuntu-18.04"], 'clang-10', 'Debug') },
+    "ACC1804 Code Coverage Test":                       { ACCCodeCoverageTest(AGENTS_LABELS["acc-ubuntu-18.04"], 'clang-10', 'Debug') },
 ]
-upgrade_tests = [
-    "ACC2004 Upgrade Package RelWithDebInfo LVI": { ACCUpgradeTest(AGENTS_LABELS["acc-ubuntu-20.04"], 'clang-10', '20.04', ['-DLVI_MITIGATION=None', '-DLVI_MITIGATION_SKIP_TESTS=ON']) },
-    "ACC1804 Upgrade Package RelWithDebInfo LVI": { ACCUpgradeTest(AGENTS_LABELS["acc-ubuntu-18.04"], 'clang-10', '18.04', ['-DLVI_MITIGATION=None', '-DLVI_MITIGATION_SKIP_TESTS=ON']) }
+upgrade_fast_tests = [
+    "ACC2004 Upgrade Package RelWithDebInfo LVI":       { ACCUpgradeTest(AGENTS_LABELS["acc-ubuntu-20.04"], 'clang-10', '20.04', ['-DLVI_MITIGATION=None', '-DLVI_MITIGATION_SKIP_TESTS=ON']) },
+    "ACC1804 Upgrade Package RelWithDebInfo LVI":       { ACCUpgradeTest(AGENTS_LABELS["acc-ubuntu-18.04"], 'clang-10', '18.04', ['-DLVI_MITIGATION=None', '-DLVI_MITIGATION_SKIP_TESTS=ON']) }
 ]
-matrix_tests = [
+upgrade_full_tests = [
+    "ACC2004 Upgrade Package RelWithDebInfo LVI Full":       { ACCUpgradeTest(AGENTS_LABELS["acc-ubuntu-20.04"], 'clang-10', '20.04', ['-DLVI_MITIGATION=None', '-DLVI_MITIGATION_SKIP_TESTS=OFF']) },
+    "ACC1804 Upgrade Package RelWithDebInfo LVI Full":       { ACCUpgradeTest(AGENTS_LABELS["acc-ubuntu-18.04"], 'clang-10', '18.04', ['-DLVI_MITIGATION=None', '-DLVI_MITIGATION_SKIP_TESTS=OFF']) }
+]
+matrix_fast_tests = [
     //                                                                           | Operating System   | Compiler  | Build Type         | LVI Mitigation                | LVI Mitigation Skip Tests        | SNMALLOC     
-    "ACC2004 clang-10 RelWithDebInfo Full":              { ACCTest(AGENTS_LABELS["acc-ubuntu-20.04"], 'clang-10', 'RelWithDebInfo',   ['-DLVI_MITIGATION=None',        '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=OFF']) },
     "ACC2004 clang-10 RelWithDebInfo":                   { ACCTest(AGENTS_LABELS["acc-ubuntu-20.04"], 'clang-10', 'RelWithDebInfo',   ['-DLVI_MITIGATION=None',        '-DLVI_MITIGATION_SKIP_TESTS=ON',  '-DUSE_SNMALLOC=OFF']) },
-    "ACC2004 clang-10 RelWithDebInfo LVI Full":          { ACCTest(AGENTS_LABELS["acc-ubuntu-20.04"], 'clang-10', 'RelWithDebInfo',   ['-DLVI_MITIGATION=ControlFlow', '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=OFF']) },
     "ACC2004 clang-10 RelWithDebInfo LVI":               { ACCTest(AGENTS_LABELS["acc-ubuntu-20.04"], 'clang-10', 'RelWithDebInfo',   ['-DLVI_MITIGATION=ControlFlow', '-DLVI_MITIGATION_SKIP_TESTS=ON',  '-DUSE_SNMALLOC=OFF']) },
-    "ACC2004 clang-10 RelWithDebInfo LVI snmalloc Full": { ACCTest(AGENTS_LABELS["acc-ubuntu-20.04"], 'clang-10', 'RelWithDebInfo',   ['-DLVI_MITIGATION=ControlFlow', '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=ON' ]) },
     "ACC2004 clang-10 RelWithDebInfo LVI snmalloc":      { ACCTest(AGENTS_LABELS["acc-ubuntu-20.04"], 'clang-10', 'RelWithDebInfo',   ['-DLVI_MITIGATION=ControlFlow', '-DLVI_MITIGATION_SKIP_TESTS=ON',  '-DUSE_SNMALLOC=ON' ]) },
-    "ACC2004 clang-10 Debug Full":                       { ACCTest(AGENTS_LABELS["acc-ubuntu-20.04"], 'clang-10', 'Debug',            ['-DLVI_MITIGATION=None',        '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=OFF']) },
     "ACC2004 clang-10 Debug":                            { ACCTest(AGENTS_LABELS["acc-ubuntu-20.04"], 'clang-10', 'Debug',            ['-DLVI_MITIGATION=None',        '-DLVI_MITIGATION_SKIP_TESTS=ON',  '-DUSE_SNMALLOC=OFF']) },
-    "ACC2004 clang-10 Debug LVI Full":                   { ACCTest(AGENTS_LABELS["acc-ubuntu-20.04"], 'clang-10', 'Debug',            ['-DLVI_MITIGATION=ControlFlow', '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=OFF']) },
     "ACC2004 clang-10 Debug LVI":                        { ACCTest(AGENTS_LABELS["acc-ubuntu-20.04"], 'clang-10', 'Debug',            ['-DLVI_MITIGATION=ControlFlow', '-DLVI_MITIGATION_SKIP_TESTS=ON',  '-DUSE_SNMALLOC=OFF']) },
-    "ACC1804 clang-10 RelWithDebInfo Full":              { ACCTest(AGENTS_LABELS["acc-ubuntu-18.04"], 'clang-10', 'RelWithDebInfo',   ['-DLVI_MITIGATION=None',        '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=OFF']) },
     "ACC1804 clang-10 RelWithDebInfo":                   { ACCTest(AGENTS_LABELS["acc-ubuntu-18.04"], 'clang-10', 'RelWithDebInfo',   ['-DLVI_MITIGATION=None',        '-DLVI_MITIGATION_SKIP_TESTS=ON',  '-DUSE_SNMALLOC=OFF']) },
-    "ACC1804 clang-10 RelWithDebInfo LVI Full":          { ACCTest(AGENTS_LABELS["acc-ubuntu-18.04"], 'clang-10', 'RelWithDebInfo',   ['-DLVI_MITIGATION=ControlFlow', '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=OFF']) },
     "ACC1804 clang-10 RelWithDebInfo LVI":               { ACCTest(AGENTS_LABELS["acc-ubuntu-18.04"], 'clang-10', 'RelWithDebInfo',   ['-DLVI_MITIGATION=ControlFlow', '-DLVI_MITIGATION_SKIP_TESTS=ON',  '-DUSE_SNMALLOC=OFF']) },
-    "ACC1804 clang-10 RelWithDebInfo LVI snmalloc Full": { ACCTest(AGENTS_LABELS["acc-ubuntu-18.04"], 'clang-10', 'RelWithDebInfo',   ['-DLVI_MITIGATION=ControlFlow', '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=ON' ]) },
     "ACC1804 clang-10 RelWithDebInfo LVI snmalloc":      { ACCTest(AGENTS_LABELS["acc-ubuntu-18.04"], 'clang-10', 'RelWithDebInfo',   ['-DLVI_MITIGATION=ControlFlow', '-DLVI_MITIGATION_SKIP_TESTS=ON',  '-DUSE_SNMALLOC=ON' ]) },
-    "ACC1804 clang-10 Debug Full":                       { ACCTest(AGENTS_LABELS["acc-ubuntu-18.04"], 'clang-10', 'Debug',            ['-DLVI_MITIGATION=None',        '-DLVI_MITIGATION_SKIP_TESTS=ON',  '-DUSE_SNMALLOC=OFF']) },
-    "ACC1804 clang-10 Debug":                            { ACCTest(AGENTS_LABELS["acc-ubuntu-18.04"], 'clang-10', 'Debug',            ['-DLVI_MITIGATION=None',        '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=OFF']) },
-    "ACC1804 clang-10 Debug LVI Full":                   { ACCTest(AGENTS_LABELS["acc-ubuntu-18.04"], 'clang-10', 'Debug',            ['-DLVI_MITIGATION=ControlFlow', '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=OFF']) },
+    "ACC1804 clang-10 Debug":                            { ACCTest(AGENTS_LABELS["acc-ubuntu-18.04"], 'clang-10', 'Debug',            ['-DLVI_MITIGATION=None',        '-DLVI_MITIGATION_SKIP_TESTS=ON',  '-DUSE_SNMALLOC=OFF']) },
     "ACC1804 clang-10 Debug LVI":                        { ACCTest(AGENTS_LABELS["acc-ubuntu-18.04"], 'clang-10', 'Debug',            ['-DLVI_MITIGATION=ControlFlow', '-DLVI_MITIGATION_SKIP_TESTS=ON',  '-DUSE_SNMALLOC=OFF']) }
+]
+matrix_full_tests = [
+    //                                                                           | Operating System   | Compiler  | Build Type         | LVI Mitigation                | LVI Mitigation Skip Tests        | SNMALLOC     
+    "ACC2004 clang-10 Full RelWithDebInfo":                   { ACCTest(AGENTS_LABELS["acc-ubuntu-20.04"], 'clang-10', 'RelWithDebInfo',   ['-DLVI_MITIGATION=None',        '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=OFF']) },
+    "ACC2004 clang-10 Full RelWithDebInfo LVI":               { ACCTest(AGENTS_LABELS["acc-ubuntu-20.04"], 'clang-10', 'RelWithDebInfo',   ['-DLVI_MITIGATION=ControlFlow', '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=OFF']) },
+    "ACC2004 clang-10 Full RelWithDebInfo LVI snmalloc":      { ACCTest(AGENTS_LABELS["acc-ubuntu-20.04"], 'clang-10', 'RelWithDebInfo',   ['-DLVI_MITIGATION=ControlFlow', '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=ON' ]) },
+    "ACC2004 clang-10 Full Debug":                            { ACCTest(AGENTS_LABELS["acc-ubuntu-20.04"], 'clang-10', 'Debug',            ['-DLVI_MITIGATION=None',        '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=OFF']) },
+    "ACC2004 clang-10 Full Debug LVI":                        { ACCTest(AGENTS_LABELS["acc-ubuntu-20.04"], 'clang-10', 'Debug',            ['-DLVI_MITIGATION=ControlFlow', '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=OFF']) },
+    "ACC1804 clang-10 Full RelWithDebInfo":                   { ACCTest(AGENTS_LABELS["acc-ubuntu-18.04"], 'clang-10', 'RelWithDebInfo',   ['-DLVI_MITIGATION=None',        '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=OFF']) },
+    "ACC1804 clang-10 Full RelWithDebInfo LVI":               { ACCTest(AGENTS_LABELS["acc-ubuntu-18.04"], 'clang-10', 'RelWithDebInfo',   ['-DLVI_MITIGATION=ControlFlow', '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=OFF']) },
+    "ACC1804 clang-10 Full RelWithDebInfo LVI snmalloc":      { ACCTest(AGENTS_LABELS["acc-ubuntu-18.04"], 'clang-10', 'RelWithDebInfo',   ['-DLVI_MITIGATION=ControlFlow', '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=ON' ]) },
+    "ACC1804 clang-10 Full Debug":                            { ACCTest(AGENTS_LABELS["acc-ubuntu-18.04"], 'clang-10', 'Debug',            ['-DLVI_MITIGATION=None',        '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=OFF']) },
+    "ACC1804 clang-10 Full Debug LVI":                        { ACCTest(AGENTS_LABELS["acc-ubuntu-18.04"], 'clang-10', 'Debug',            ['-DLVI_MITIGATION=ControlFlow', '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=OFF']) }
 ]
 try{
     oe.emailJobStatus('STARTED')
-    parallel host_verification_tests + host_verification_package_tests + eeid_tests + package_tests + container_tests + e2e_tests + upgrade_tests + matrix_tests
+    parallel eeid_fast_tests + eeid_full_tests + container_fast_tests + container_full_tests + upgrade_fast_tests + upgrade_full_tests
+    parallel package_fast_tests + package_full_tests
+    parallel matrix_fast_tests + matrix_full_tests
+
+    // host_verification_package_tests + eeid_tests + package_tests + container_tests + e2e_tests + upgrade_tests + matrix_tests
 
     /* 
     testing_stages
@@ -618,6 +645,22 @@ try{
     GLOBAL_ERROR = e
     throw e
 } finally {
+
+    def jobName = "pipelines/Azure-Linux"
+    Integer runNumber = BUILD_NUMBER as Integer
+    def run = Jenkins.instance.getItemByFullName(jobName).getBuildByNumber(runNumber)
+
+    PipelineNodeGraphVisitor visitor = new PipelineNodeGraphVisitor(run)
+    def stageNodes = visitor.getPipelineNodes().findAll { it.getType() == FlowNodeWrapper.NodeType.PARALLEL }
+
+    for (def node: stageNodes) {
+        String stageName = node.getDisplayName()
+        println node.getTiming()
+        // println "Result of stage ${node.getDisplayName()} is ${node.status.result} (${node.status.state})"
+        // println " timings: start=${node.timingInfo.startTimeMillis}ms; durationMillis=${node.timingInfo.totalDurationMillis}ms; paused=${node.timingInfo.pauseDurationMillis}ms"
+        println "${node.getDisplayName()}, ${node.timingInfo.totalDurationMillis / 1000 / 60}" 
+        // println "----------------------------------------------------------------"
+    }
     currentBuild.result = (GLOBAL_ERROR != null) ? 'FAILURE' : "SUCCESS"
     oe.emailJobStatus(currentBuild.result)
 }
