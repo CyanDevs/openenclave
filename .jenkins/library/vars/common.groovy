@@ -165,7 +165,10 @@ def emailJobStatus(String status) {
  */
 def WinCompilePackageTest(String dirName, String buildType, String hasQuoteProvider, Integer timeoutSeconds, String lviMitigation = 'None', String lviMitigationSkipTests = 'ON', List extra_cmake_args = []) {
     cleanWs()
-    checkout scm
+    checkout([$class: 'GitSCM',
+        branches: [[name: BRANCH_NAME]],
+        extensions: [[$class: 'CloneOption', timeout: 30]],
+        userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
     dir(dirName) {
         /*
         In simulation mode, some samples should not be ran or should run simulation mode. 

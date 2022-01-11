@@ -14,7 +14,10 @@ def LinuxPackaging(String version, String build_type, String lvi_mitigation = 'N
         node("ACC-${version}") {
             timeout(GLOBAL_TIMEOUT_MINUTES) {
                 cleanWs()
-                checkout scm
+                checkout([$class: 'GitSCM',
+                    branches: [[name: BRANCH_NAME]],
+                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 def task = """
                            cmake ${WORKSPACE}                               \
                              -DCMAKE_BUILD_TYPE=${build_type}               \

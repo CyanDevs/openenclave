@@ -16,7 +16,10 @@ def ACCLibcxxTest(String label, String compiler, String build_type) {
         node(label) {
             timeout(GLOBAL_TIMEOUT_MINUTES) {
                 cleanWs()
-                checkout scm
+                checkout([$class: 'GitSCM',
+                    branches: [[name: BRANCH_NAME]],
+                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 def task = """
                            cmake .. -DCMAKE_BUILD_TYPE=${build_type} -DHAS_QUOTE_PROVIDER=ON -DENABLE_FULL_LIBCXX_TESTS=ON
                            make

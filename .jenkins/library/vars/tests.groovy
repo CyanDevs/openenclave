@@ -12,7 +12,10 @@ def ACCCodeCoverageTest(String label, String compiler, String build_type) {
         node("${label}") {
             timeout(globalvars.GLOBAL_TIMEOUT_MINUTES) {
                 cleanWs()
-                checkout scm
+                checkout([$class: 'GitSCM',
+                    branches: [[name: BRANCH_NAME]],
+                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 def cmakeArgs = helpers.CmakeArgs(build_type)
                 def task = """
                            ${helpers.ninjaBuildCommand(cmakeArgs)}
@@ -47,7 +50,10 @@ def ACCTest(String label, String compiler, String build_type, List extra_cmake_a
         node(label) {
             timeout(globalvars.GLOBAL_TIMEOUT_MINUTES) {
                 cleanWs()
-                checkout scm
+                checkout([$class: 'GitSCM',
+                    branches: [[name: BRANCH_NAME]],
+                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 if (fresh_install) {
                     sh  """
                         sudo bash scripts/ansible/install-ansible.sh
@@ -80,7 +86,10 @@ def ACCUpgradeTest(String label, String compiler, String version, List extra_cma
         node("${label}") {
             timeout(globalvars.GLOBAL_TIMEOUT_MINUTES) {
                 cleanWs()
-                checkout scm
+                checkout([$class: 'GitSCM',
+                    branches: [[name: BRANCH_NAME]],
+                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 def cmakeArgs = helpers.CmakeArgs("RelWithDebInfo","OFF","ON","-DLVI_MITIGATION_BINDIR=/usr/local/lvi-mitigation/bin",extra_cmake_args.join(' '))
                 withEnv(test_env) {
                     common.Run(compiler, helpers.InstallReleaseCommand())
@@ -99,7 +108,10 @@ def ACCContainerTest(String label, String version, List extra_cmake_args = []) {
         node("${label}") {
             timeout(globalvars.GLOBAL_TIMEOUT_MINUTES) {
                 cleanWs()
-                checkout scm
+                checkout([$class: 'GitSCM',
+                    branches: [[name: BRANCH_NAME]],
+                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 def cmakeArgs = helpers.CmakeArgs("RelWithDebInfo","OFF","ON","-DLVI_MITIGATION_BINDIR=/usr/local/lvi-mitigation/bin",extra_cmake_args.join(' '))
                 def devices = helpers.getDockerSGXDevices("ubuntu", helpers.getUbuntuReleaseVer())
                 println("${label} running Docker container with ${devices}")
@@ -118,7 +130,10 @@ def ACCPackageTest(String label, String version, List extra_cmake_args = []) {
         node("${label}") {
             timeout(globalvars.GLOBAL_TIMEOUT_MINUTES) {
                 cleanWs()
-                checkout scm
+                checkout([$class: 'GitSCM',
+                    branches: [[name: BRANCH_NAME]],
+                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 def cmakeArgs = helpers.CmakeArgs("RelWithDebInfo","OFF","ON","-DLVI_MITIGATION_BINDIR=/usr/local/lvi-mitigation/bin",extra_cmake_args.join(' '))
                 def devices = helpers.getDockerSGXDevices("ubuntu", helpers.getUbuntuReleaseVer())
                 println("${label} running Docker container with ${devices}")
@@ -150,7 +165,10 @@ def ACCHostVerificationTest(String version, String build_type) {
         node(globalvars.AGENTS_LABELS["acc-ubuntu-18.04"]) {
             timeout(globalvars.GLOBAL_TIMEOUT_MINUTES) {
                 cleanWs()
-                checkout scm
+                checkout([$class: 'GitSCM',
+                    branches: [[name: BRANCH_NAME]],
+                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 def cmakeArgs = "-G Ninja -DCMAKE_BUILD_TYPE=${build_type} -Wdev"
                 def devices = helpers.getDockerSGXDevices("ubuntu", helpers.getUbuntuReleaseVer())
                 println("ACC-1804 running Docker container with ${devices}")
@@ -207,7 +225,10 @@ def ACCHostVerificationTest(String version, String build_type) {
         node(globalvars.AGENTS_LABELS["ubuntu-nonsgx"]) {
             timeout(globalvars.GLOBAL_TIMEOUT_MINUTES) {
                 cleanWs()
-                checkout scm
+                checkout([$class: 'GitSCM',
+                    branches: [[name: BRANCH_NAME]],
+                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 unstash "linux_host_verify-${version}-${build_type}-${BUILD_NUMBER}"
                 def cmakeArgs = "-G Ninja -DBUILD_ENCLAVES=OFF -DCMAKE_BUILD_TYPE=${build_type} -Wdev"
                 def task = """
@@ -225,7 +246,10 @@ def ACCHostVerificationTest(String version, String build_type) {
         node(globalvars.AGENTS_LABELS["windows-nonsgx"]) {
             timeout(globalvars.GLOBAL_TIMEOUT_MINUTES) {
                 cleanWs()
-                checkout scm
+                checkout([$class: 'GitSCM',
+                    branches: [[name: BRANCH_NAME]],
+                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 unstash "linux_host_verify-${version}-${build_type}-${BUILD_NUMBER}"
                 def cmakeArgs = "-G Ninja -DBUILD_ENCLAVES=OFF -DCMAKE_BUILD_TYPE=${build_type} -DNUGET_PACKAGE_PATH=C:/oe_prereqs -Wdev"
                 dir('build') {
@@ -252,7 +276,10 @@ def ACCHostVerificationPackageTest(String version, String build_type) {
         node(globalvars.AGENTS_LABELS["acc-ubuntu-18.04"]) {
             timeout(globalvars.GLOBAL_TIMEOUT_MINUTES) {
                 cleanWs()
-                checkout scm
+                checkout([$class: 'GitSCM',
+                    branches: [[name: BRANCH_NAME]],
+                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 def cmakeArgs = "-G Ninja -DCMAKE_BUILD_TYPE=${build_type} -Wdev"
                 def devices = helpers.getDockerSGXDevices("ubuntu", helpers.getUbuntuReleaseVer())
                 println("ACC-1804 running Docker container with ${devices}")
@@ -309,7 +336,10 @@ def ACCHostVerificationPackageTest(String version, String build_type) {
         node(globalvars.AGENTS_LABELS["ubuntu-nonsgx"]) {
             timeout(globalvars.GLOBAL_TIMEOUT_MINUTES) {
                 cleanWs()
-                checkout scm
+                checkout([$class: 'GitSCM',
+                    branches: [[name: BRANCH_NAME]],
+                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 unstash "linux_host_verify-${version}-${build_type}-${BUILD_NUMBER}"
                 cmakeArgs = "-G Ninja \
                              -DBUILD_ENCLAVES=OFF \
@@ -348,7 +378,10 @@ def ACCHostVerificationPackageTest(String version, String build_type) {
         node(globalvars.AGENTS_LABELS["windows-nonsgx"]) {
             timeout(globalvars.GLOBAL_TIMEOUT_MINUTES) {
                 cleanWs()
-                checkout scm
+                checkout([$class: 'GitSCM',
+                    branches: [[name: BRANCH_NAME]],
+                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 unstash "linux_host_verify-${version}-${build_type}-${BUILD_NUMBER}"
                 cmakeArgs = "-G Ninja \
                              -DBUILD_ENCLAVES=OFF \
@@ -409,7 +442,10 @@ def TestIntelRCs(String label, String release_version, String oe_package = "open
         node(label) {
             timeout(globalvars.GLOBAL_TIMEOUT_MINUTES) {
                 cleanWs()
-                checkout scm
+                checkout([$class: 'GitSCM',
+                    branches: [[name: BRANCH_NAME]],
+                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 helpers.dependenciesInstall(dcap_url, psw_url, install_flags)
                 helpers.releaseInstall(release_version, oe_package, source)
                 helpers.TestSamplesCommand(lvi_mitigation, oe_package)
@@ -425,7 +461,10 @@ def windowsPrereqsVerify(String label) {
         node(globalvars.AGENTS_LABELS[label]) {
             timeout(globalvars.GLOBAL_TIMEOUT_MINUTES) {
                 cleanWs()
-                checkout scm
+                checkout([$class: 'GitSCM',
+                    branches: [[name: BRANCH_NAME]],
+                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 dir('scripts') {
                     bat(
                         returnStdout: false,
@@ -445,7 +484,10 @@ def windowsLinuxElfBuild(String label, String version, String compiler, String b
         node(globalvars.AGENTS_LABELS["ubuntu-nonsgx"]) {
             timeout(globalvars.GLOBAL_TIMEOUT_MINUTES) {
                 cleanWs()
-                checkout scm
+                checkout([$class: 'GitSCM',
+                    branches: [[name: BRANCH_NAME]],
+                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 def task = """
                            cmake ${WORKSPACE}                                           \
                                -G Ninja                                                 \
@@ -466,7 +508,10 @@ def windowsLinuxElfBuild(String label, String version, String compiler, String b
         node(globalvars.AGENTS_LABELS[label]) {
             timeout(globalvars.GLOBAL_TIMEOUT_MINUTES) {
                 cleanWs()
-                checkout scm
+                checkout([$class: 'GitSCM',
+                    branches: [[name: BRANCH_NAME]],
+                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 unstash "linux-${label}-${compiler}-${build_type}-lvi_mitigation=${lvi_mitigation}-${version}-${BUILD_NUMBER}"
                 bat 'move build linuxbin'
                 dir('build') {
@@ -508,8 +553,10 @@ def windowsCrossPlatform(String label) {
         node(node_label) {
             timeout(globalvars.GLOBAL_TIMEOUT_MINUTES) {
                 cleanWs()
-                checkout scm
-
+                checkout([$class: 'GitSCM',
+                    branches: [[name: BRANCH_NAME]],
+                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 dir("devex/cross-nuget/standalone-builds/windows") {
                     bat(
                         returnStdout: false,
@@ -533,7 +580,10 @@ def simulationContainerTest(String version, String build_type, List extra_cmake_
         node(globalvars.AGENTS_LABELS["ubuntu-nonsgx"]) {
             timeout(globalvars.GLOBAL_TIMEOUT_MINUTES) {
                 cleanWs()
-                checkout scm
+                checkout([$class: 'GitSCM',
+                    branches: [[name: BRANCH_NAME]],
+                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 def task = """
                            cmake ${WORKSPACE}                                           \
                                -G Ninja                                                 \
@@ -557,7 +607,10 @@ def buildCrossPlatform(String version) {
         node(globalvars.AGENTS_LABELS["ubuntu-nonsgx"]) {
             timeout(globalvars.GLOBAL_TIMEOUT_MINUTES) {
                 cleanWs()
-                checkout scm
+                checkout([$class: 'GitSCM',
+                    branches: [[name: BRANCH_NAME]],
+                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 def os = version == "20.04" ? "focal" : "bionic"
                 def task = """
                            cd ${WORKSPACE}
@@ -587,7 +640,10 @@ def AArch64GNUTest(String version, String build_type) {
         node(globalvars.AGENTS_LABELS["ubuntu-nonsgx"]) {
             timeout(globalvars.GLOBAL_TIMEOUT_MINUTES) {
                 cleanWs()
-                checkout scm
+                checkout([$class: 'GitSCM',
+                    branches: [[name: BRANCH_NAME]],
+                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 def task = """
                             cmake ${WORKSPACE}                                                     \
                                 -G Ninja                                                           \
@@ -609,7 +665,10 @@ def checkDevFlows(String version) {
         node(globalvars.AGENTS_LABELS["ubuntu-nonsgx"]) {
             timeout(globalvars.GLOBAL_TIMEOUT_MINUTES) {
                 cleanWs()
-                checkout scm
+                checkout([$class: 'GitSCM',
+                    branches: [[name: BRANCH_NAME]],
+                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 def task = """
                            cmake ${WORKSPACE} -G Ninja -DHAS_QUOTE_PROVIDER=OFF -Wdev --warn-uninitialized -Werror=dev
                            ninja -v
@@ -625,7 +684,10 @@ def checkCI() {
         node(globalvars.AGENTS_LABELS["ubuntu-nonsgx"]) {
             timeout(globalvars.GLOBAL_TIMEOUT_MINUTES) {
                 cleanWs()
-                checkout scm
+                checkout([$class: 'GitSCM',
+                    branches: [[name: BRANCH_NAME]],
+                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 // At the moment, the check-ci script assumes that it's executed from the
                 // root source code directory.
                 common.ContainerRun("oetools-18.04:${DOCKER_TAG}", "clang-10", "cd ${WORKSPACE} && ./scripts/check-ci", "--cap-add=SYS_PTRACE")
