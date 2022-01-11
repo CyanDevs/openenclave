@@ -16,7 +16,8 @@ def LinuxPackaging(String version, String build_type, String lvi_mitigation = 'N
                 cleanWs()
                 checkout([$class: 'GitSCM',
                     branches: [[name: BRANCH_NAME]],
-                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    extensions: [[$class: 'CloneOption', timeout: 33],
+                                 [$class: 'CheckoutOption', timeout: 44]],
                     userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 def task = """
                            cmake ${WORKSPACE}                               \

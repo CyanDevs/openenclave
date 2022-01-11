@@ -18,7 +18,8 @@ def ACCLibcxxTest(String label, String compiler, String build_type) {
                 cleanWs()
                 checkout([$class: 'GitSCM',
                     branches: [[name: BRANCH_NAME]],
-                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    extensions: [[$class: 'CloneOption', timeout: 33],
+                                 [$class: 'CheckoutOption', timeout: 44]],
                     userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 def task = """
                            cmake .. -DCMAKE_BUILD_TYPE=${build_type} -DHAS_QUOTE_PROVIDER=ON -DENABLE_FULL_LIBCXX_TESTS=ON

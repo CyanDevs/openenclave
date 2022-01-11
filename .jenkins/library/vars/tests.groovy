@@ -14,7 +14,8 @@ def ACCCodeCoverageTest(String label, String compiler, String build_type) {
                 cleanWs()
                 checkout([$class: 'GitSCM',
                     branches: [[name: BRANCH_NAME]],
-                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    extensions: [[$class: 'CloneOption', timeout: 33],
+                                 [$class: 'CheckoutOption', timeout: 44]],
                     userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 def cmakeArgs = helpers.CmakeArgs(build_type)
                 def task = """
@@ -52,7 +53,8 @@ def ACCTest(String label, String compiler, String build_type, List extra_cmake_a
                 cleanWs()
                 checkout([$class: 'GitSCM',
                     branches: [[name: BRANCH_NAME]],
-                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    extensions: [[$class: 'CloneOption', timeout: 33],
+                                 [$class: 'CheckoutOption', timeout: 44]],
                     userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 if (fresh_install) {
                     sh  """
@@ -88,7 +90,8 @@ def ACCUpgradeTest(String label, String compiler, String version, List extra_cma
                 cleanWs()
                 checkout([$class: 'GitSCM',
                     branches: [[name: BRANCH_NAME]],
-                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    extensions: [[$class: 'CloneOption', timeout: 33],
+                                 [$class: 'CheckoutOption', timeout: 44]],
                     userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 def cmakeArgs = helpers.CmakeArgs("RelWithDebInfo","OFF","ON","-DLVI_MITIGATION_BINDIR=/usr/local/lvi-mitigation/bin",extra_cmake_args.join(' '))
                 withEnv(test_env) {
@@ -110,7 +113,8 @@ def ACCContainerTest(String label, String version, List extra_cmake_args = []) {
                 cleanWs()
                 checkout([$class: 'GitSCM',
                     branches: [[name: BRANCH_NAME]],
-                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    extensions: [[$class: 'CloneOption', timeout: 33],
+                                 [$class: 'CheckoutOption', timeout: 44]],
                     userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 def cmakeArgs = helpers.CmakeArgs("RelWithDebInfo","OFF","ON","-DLVI_MITIGATION_BINDIR=/usr/local/lvi-mitigation/bin",extra_cmake_args.join(' '))
                 def devices = helpers.getDockerSGXDevices("ubuntu", helpers.getUbuntuReleaseVer())
@@ -132,7 +136,8 @@ def ACCPackageTest(String label, String version, List extra_cmake_args = []) {
                 cleanWs()
                 checkout([$class: 'GitSCM',
                     branches: [[name: BRANCH_NAME]],
-                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    extensions: [[$class: 'CloneOption', timeout: 33],
+                                 [$class: 'CheckoutOption', timeout: 44]],
                     userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 def cmakeArgs = helpers.CmakeArgs("RelWithDebInfo","OFF","ON","-DLVI_MITIGATION_BINDIR=/usr/local/lvi-mitigation/bin",extra_cmake_args.join(' '))
                 def devices = helpers.getDockerSGXDevices("ubuntu", helpers.getUbuntuReleaseVer())
@@ -167,7 +172,8 @@ def ACCHostVerificationTest(String version, String build_type) {
                 cleanWs()
                 checkout([$class: 'GitSCM',
                     branches: [[name: BRANCH_NAME]],
-                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    extensions: [[$class: 'CloneOption', timeout: 33],
+                                 [$class: 'CheckoutOption', timeout: 44]],
                     userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 def cmakeArgs = "-G Ninja -DCMAKE_BUILD_TYPE=${build_type} -Wdev"
                 def devices = helpers.getDockerSGXDevices("ubuntu", helpers.getUbuntuReleaseVer())
@@ -227,7 +233,8 @@ def ACCHostVerificationTest(String version, String build_type) {
                 cleanWs()
                 checkout([$class: 'GitSCM',
                     branches: [[name: BRANCH_NAME]],
-                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    extensions: [[$class: 'CloneOption', timeout: 33],
+                                 [$class: 'CheckoutOption', timeout: 44]],
                     userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 unstash "linux_host_verify-${version}-${build_type}-${BUILD_NUMBER}"
                 def cmakeArgs = "-G Ninja -DBUILD_ENCLAVES=OFF -DCMAKE_BUILD_TYPE=${build_type} -Wdev"
@@ -248,7 +255,8 @@ def ACCHostVerificationTest(String version, String build_type) {
                 cleanWs()
                 checkout([$class: 'GitSCM',
                     branches: [[name: BRANCH_NAME]],
-                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    extensions: [[$class: 'CloneOption', timeout: 33],
+                                 [$class: 'CheckoutOption', timeout: 44]],
                     userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 unstash "linux_host_verify-${version}-${build_type}-${BUILD_NUMBER}"
                 def cmakeArgs = "-G Ninja -DBUILD_ENCLAVES=OFF -DCMAKE_BUILD_TYPE=${build_type} -DNUGET_PACKAGE_PATH=C:/oe_prereqs -Wdev"
@@ -278,7 +286,8 @@ def ACCHostVerificationPackageTest(String version, String build_type) {
                 cleanWs()
                 checkout([$class: 'GitSCM',
                     branches: [[name: BRANCH_NAME]],
-                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    extensions: [[$class: 'CloneOption', timeout: 33],
+                                 [$class: 'CheckoutOption', timeout: 44]],
                     userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 def cmakeArgs = "-G Ninja -DCMAKE_BUILD_TYPE=${build_type} -Wdev"
                 def devices = helpers.getDockerSGXDevices("ubuntu", helpers.getUbuntuReleaseVer())
@@ -338,7 +347,8 @@ def ACCHostVerificationPackageTest(String version, String build_type) {
                 cleanWs()
                 checkout([$class: 'GitSCM',
                     branches: [[name: BRANCH_NAME]],
-                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    extensions: [[$class: 'CloneOption', timeout: 33],
+                                 [$class: 'CheckoutOption', timeout: 44]],
                     userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 unstash "linux_host_verify-${version}-${build_type}-${BUILD_NUMBER}"
                 cmakeArgs = "-G Ninja \
@@ -380,7 +390,8 @@ def ACCHostVerificationPackageTest(String version, String build_type) {
                 cleanWs()
                 checkout([$class: 'GitSCM',
                     branches: [[name: BRANCH_NAME]],
-                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    extensions: [[$class: 'CloneOption', timeout: 33],
+                                 [$class: 'CheckoutOption', timeout: 44]],
                     userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 unstash "linux_host_verify-${version}-${build_type}-${BUILD_NUMBER}"
                 cmakeArgs = "-G Ninja \
@@ -444,7 +455,8 @@ def TestIntelRCs(String label, String release_version, String oe_package = "open
                 cleanWs()
                 checkout([$class: 'GitSCM',
                     branches: [[name: BRANCH_NAME]],
-                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    extensions: [[$class: 'CloneOption', timeout: 33],
+                                 [$class: 'CheckoutOption', timeout: 44]],
                     userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 helpers.dependenciesInstall(dcap_url, psw_url, install_flags)
                 helpers.releaseInstall(release_version, oe_package, source)
@@ -463,7 +475,8 @@ def windowsPrereqsVerify(String label) {
                 cleanWs()
                 checkout([$class: 'GitSCM',
                     branches: [[name: BRANCH_NAME]],
-                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    extensions: [[$class: 'CloneOption', timeout: 33],
+                                 [$class: 'CheckoutOption', timeout: 44]],
                     userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 dir('scripts') {
                     bat(
@@ -486,7 +499,8 @@ def windowsLinuxElfBuild(String label, String version, String compiler, String b
                 cleanWs()
                 checkout([$class: 'GitSCM',
                     branches: [[name: BRANCH_NAME]],
-                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    extensions: [[$class: 'CloneOption', timeout: 33],
+                                 [$class: 'CheckoutOption', timeout: 44]],
                     userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 def task = """
                            cmake ${WORKSPACE}                                           \
@@ -510,7 +524,8 @@ def windowsLinuxElfBuild(String label, String version, String compiler, String b
                 cleanWs()
                 checkout([$class: 'GitSCM',
                     branches: [[name: BRANCH_NAME]],
-                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    extensions: [[$class: 'CloneOption', timeout: 33],
+                                 [$class: 'CheckoutOption', timeout: 44]],
                     userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 unstash "linux-${label}-${compiler}-${build_type}-lvi_mitigation=${lvi_mitigation}-${version}-${BUILD_NUMBER}"
                 bat 'move build linuxbin'
@@ -555,7 +570,8 @@ def windowsCrossPlatform(String label) {
                 cleanWs()
                 checkout([$class: 'GitSCM',
                     branches: [[name: BRANCH_NAME]],
-                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    extensions: [[$class: 'CloneOption', timeout: 33],
+                                 [$class: 'CheckoutOption', timeout: 44]],
                     userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 dir("devex/cross-nuget/standalone-builds/windows") {
                     bat(
@@ -582,7 +598,8 @@ def simulationContainerTest(String version, String build_type, List extra_cmake_
                 cleanWs()
                 checkout([$class: 'GitSCM',
                     branches: [[name: BRANCH_NAME]],
-                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    extensions: [[$class: 'CloneOption', timeout: 33],
+                                 [$class: 'CheckoutOption', timeout: 44]],
                     userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 def task = """
                            cmake ${WORKSPACE}                                           \
@@ -609,7 +626,8 @@ def buildCrossPlatform(String version) {
                 cleanWs()
                 checkout([$class: 'GitSCM',
                     branches: [[name: BRANCH_NAME]],
-                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    extensions: [[$class: 'CloneOption', timeout: 33],
+                                 [$class: 'CheckoutOption', timeout: 44]],
                     userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 def os = version == "20.04" ? "focal" : "bionic"
                 def task = """
@@ -642,7 +660,8 @@ def AArch64GNUTest(String version, String build_type) {
                 cleanWs()
                 checkout([$class: 'GitSCM',
                     branches: [[name: BRANCH_NAME]],
-                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    extensions: [[$class: 'CloneOption', timeout: 33],
+                                 [$class: 'CheckoutOption', timeout: 44]],
                     userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 def task = """
                             cmake ${WORKSPACE}                                                     \
@@ -667,7 +686,8 @@ def checkDevFlows(String version) {
                 cleanWs()
                 checkout([$class: 'GitSCM',
                     branches: [[name: BRANCH_NAME]],
-                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    extensions: [[$class: 'CloneOption', timeout: 33],
+                                 [$class: 'CheckoutOption', timeout: 44]],
                     userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 def task = """
                            cmake ${WORKSPACE} -G Ninja -DHAS_QUOTE_PROVIDER=OFF -Wdev --warn-uninitialized -Werror=dev
@@ -686,7 +706,8 @@ def checkCI() {
                 cleanWs()
                 checkout([$class: 'GitSCM',
                     branches: [[name: BRANCH_NAME]],
-                    extensions: [[$class: 'CloneOption', timeout: 30]],
+                    extensions: [[$class: 'CloneOption', timeout: 33],
+                                 [$class: 'CheckoutOption', timeout: 44]],
                     userRemoteConfigs: [[url: "https://github.com/${params.REPOSITORY_NAME}"]]])
                 // At the moment, the check-ci script assumes that it's executed from the
                 // root source code directory.
