@@ -19,8 +19,10 @@ def buildWindowsDockerContainers() {
                 checkout scm
             }
             stage("Build Windows Server 2019 Docker Image") {
-                oe2019 = oe.dockerImage("oetools-ws2019:${DOCKER_TAG}", ".jenkins/infrastructure/docker/dockerfiles/windows/Dockerfile")
-                puboe2019 = oe.dockerImage("oeciteam/oetools-ws2019:${DOCKER_TAG}", ".jenkins/infrastructure/docker/dockerfiles/windows/Dockerfile")
+                // Workaround for https://issues.jenkins.io/browse/JENKINS-67572
+                println("oetools-ws2019:" + DOCKER_TAG)
+                oe2019 = oe.dockerImage("oetools-ws2019:" + DOCKER_TAG, ".jenkins/infrastructure/docker/dockerfiles/windows/Dockerfile")
+                puboe2019 = oe.dockerImage("oeciteam/oetools-ws2019:" + DOCKER_TAG, ".jenkins/infrastructure/docker/dockerfiles/windows/Dockerfile")
             }
             stage("Push to OE Docker Registry") {
                 docker.withRegistry(INTERNAL_REPO, INTERNAL_REPO_CREDS) {
