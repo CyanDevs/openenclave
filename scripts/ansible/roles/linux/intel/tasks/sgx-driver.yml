@@ -71,7 +71,7 @@
 
   - name: Add user to sgx_prv group
     ansible.builtin.user:
-      name: "{{ lookup('env', 'USER') }}"
+      name: "{{ lookup('env', 'USER') | default(ansible_user_id) }}"
       group: sgx_prv
     when:
      - intel_sgx_prv_permissions is defined
