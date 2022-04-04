@@ -44,6 +44,11 @@
   changed_when: false
   register: gcc
 
+- name: GCC version check
+  ansible.builtin.command: "gcc --version"
+  register: gcc_check_version
+  failed_when: gcc_check_version.stdout.find(gcc_target_version) == -1
+
 - name: Detect currently installed gcpp
   ansible.builtin.shell: "which g++"
   changed_when: false
@@ -150,3 +155,10 @@
     - { path: '{{ gcc.stdout }}', dest: 'gcc_symlink' }
     - { path: '{{ gcpp.stdout }}', dest: 'g++_symlink' }
   when: gcc.stdout | length > 0 and gcpp.stdout | length > 0
+
+- name: GCC version check
+  ansible.builtin.command: "gcc --version"
+  register: gcc_check_version_test
+
+- debug:
+    msg: "{{ gcc_check_version_test.stdout }}"

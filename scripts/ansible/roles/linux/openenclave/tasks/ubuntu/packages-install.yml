@@ -2,6 +2,10 @@
 # Licensed under the MIT License.
 
 ---
+- name: Include distribution release specific vars
+  ansible.builtin.include_vars:
+    file: "{{ ansible_distribution | lower }}/{{ ansible_distribution_release | lower }}.yml"
+
 - name: Add Microsoft repository
   ansible.builtin.include_role:
     name: linux/common
@@ -18,12 +22,37 @@
     apt_key_url: "https://apt.llvm.org/llvm-snapshot.gpg.key"
     apt_repository: "{{ llvm_apt_repository }}"
 
-- name: Install all the Open Enclave prerequisites APT packages for development
+- name: Install all dist/version specific APT packages for development
   ansible.builtin.apt:
-    name: "{{ apt_packages }}"
-    state: latest
+    name: "{{ dist_apt_packages }}"
+    state: present
     update_cache: yes
     install_recommends: no
   retries: 100
   register: install
   until: install is success
+  when: dist_apt_packages is defined
+
+- name: apt list
+  command: apt list --installed
+  register: debugapt
+
+- debug:
+    msg: "{{ debugapt.stdout }}"
+
+- name: Install all the Open Enclave prerequisites APT packages for development
+  ansible.builtin.apt:
+    name: "{{ apt_packages }}"
+    state: present
+    update_cache: yes
+    install_recommends: no
+  retries: 100
+  register: install
+  until: install is success
+
+- name: GCC version check
+  ansible.builtin.command: "gcc --version"
+  register: gcc_check_version_test
+
+- debug:
+    msg: "{{ gcc_check_version_test.stdout }}"

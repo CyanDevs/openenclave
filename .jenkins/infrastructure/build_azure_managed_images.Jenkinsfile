@@ -312,10 +312,10 @@ node(params.AGENTS_LABEL) {
         }
     }
     stage("Build Agents") {
-        parallel "Build Windows Server 2019 - nonSGX"       : { buildWindowsManagedImage("win2019", "ws2019-nonSGX", "SGX1FLC-NoIntelDrivers", image_id, image_version) },
-                 "Build Windows Server 2019 - SGX1"         : { buildWindowsManagedImage("win2019", "ws2019-SGX", "SGX1", image_id, image_version) },
-                 "Build Windows Server 2019 - SGX1FLC DCAP" : { buildWindowsManagedImage("win2019", "ws2019-SGX-DCAP", "SGX1FLC", image_id, image_version) },
-                 "Build Ubuntu 18.04" :                       { buildLinuxManagedImage("ubuntu", "18.04", image_id, image_version) },
+        // parallel "Build Windows Server 2019 - nonSGX"       : { buildWindowsManagedImage("win2019", "ws2019-nonSGX", "SGX1FLC-NoIntelDrivers", image_id, image_version) },
+        //          "Build Windows Server 2019 - SGX1"         : { buildWindowsManagedImage("win2019", "ws2019-SGX", "SGX1", image_id, image_version) },
+        //          "Build Windows Server 2019 - SGX1FLC DCAP" : { buildWindowsManagedImage("win2019", "ws2019-SGX-DCAP", "SGX1FLC", image_id, image_version) },
+        parallel "Build Ubuntu 18.04" :                       { buildLinuxManagedImage("ubuntu", "18.04", image_id, image_version) },
                  "Build Ubuntu 20.04" :                       { buildLinuxManagedImage("ubuntu", "20.04", image_id, image_version) }
     }
     stage("Clean Workspace") {

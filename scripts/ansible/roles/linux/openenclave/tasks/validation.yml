@@ -42,6 +42,13 @@
   failed_when: clang_check_version.stdout.find(clang_target_version) == -1
 
 - name: GCC version check
+  ansible.builtin.command: "which gcc"
+  register: gcc_installed
+
+- debug:
+    msg: "{{ gcc_installed.stdout }}"
+
+- name: GCC version check
   ansible.builtin.command: "gcc --version"
   register: gcc_check_version
   failed_when: gcc_check_version.stdout.find(gcc_target_version) == -1

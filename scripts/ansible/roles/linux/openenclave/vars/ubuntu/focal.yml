@@ -4,3 +4,12 @@
 ---
 gcc_target_version: "9.3.0"
 clang_target_version: "10.0.1"
+dist_apt_packages:
+  - "gcc-9={{ gcc_target_version}}-10ubuntu2"
+  - "cpp-9={{ gcc_target_version}}-10ubuntu2"
+  - "gcc-9-base={{ gcc_target_version}}-10ubuntu2"
+  - "libgcc-9-dev={{ gcc_target_version}}-10ubuntu2"
+  - "libasan5={{ gcc_target_version}}-10ubuntu2"
+  - "g++-9={{ gcc_target_version}}-10ubuntu2"
+  - "libstdc++-9-dev={{ gcc_target_version}}-10ubuntu2"
+  - "gcc=4:{{ gcc_target_version }}-1ubuntu2"
