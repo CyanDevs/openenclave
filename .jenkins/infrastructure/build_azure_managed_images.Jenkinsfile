@@ -154,7 +154,8 @@ def buildWindowsManagedImage(String os_series, String img_name_suffix, String la
                                 --admin-username ${SSH_USERNAME} \
                                 --admin-password ${SSH_PASSWORD} \
                                 --image ${AZURE_IMAGE_ID} \
-                                --public-ip-address ""
+                                --public-ip-address \"\"
+                                --nsg-rule NONE
                         '''
                     }
                 }
