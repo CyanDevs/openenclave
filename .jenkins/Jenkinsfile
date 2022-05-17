@@ -23,16 +23,11 @@ if ( REPOSITORY_NAME == 'openenclave/openenclave' && BRANCH_NAME ==~ /^(trying|s
 }
 library "OpenEnclaveJenkinsLibrary@${OECI_LIB_VERSION}"
 
-properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '90',
-                                      artifactNumToKeepStr: '180',
-                                      daysToKeepStr: '90',
-                                      numToKeepStr: '180')),
-            [$class: 'JobRestrictionProperty']])
-
 pipeline {
     agent any
     options {
-        timeout(time: 180, unit: 'MINUTES')
+        timeout(time: 240, unit: 'MINUTES')
+        buildDiscarder(logRotator(artifactDaysToKeepStr: '90', artifactNumToKeepStr: '180', daysToKeepStr: '90', numToKeepStr: '180'))
     }
     parameters {
         string(name: 'REPOSITORY_NAME', defaultValue: 'openenclave/openenclave', description: 'GitHub repository to checkout', trim: true)
