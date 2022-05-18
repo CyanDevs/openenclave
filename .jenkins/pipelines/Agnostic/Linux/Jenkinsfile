@@ -13,78 +13,115 @@ pipeline {
         string(name: 'REPOSITORY_NAME', defaultValue: 'openenclave/openenclave', description: 'GitHub repository to checkout', trim: true)
         string(name: 'BRANCH_NAME', defaultValue: 'master', description: 'The branch used to checkout the repository', trim: true)
         string(name: 'BRANCH_NAME', defaultValue: 'master', description: 'The branch used to checkout the repository', trim: true)
-        booleanParam(name: 'FULL_TEST_SUITE', defaultValue: false, description: 'Run all tests')
+        booleanParam(name: 'FULL_TEST_SUITE', defaultValue: false, description: 'Run')
         booleanParam(name: 'FORCE_TEST', defaultValue: false, description: 'Force tests to continue even if there are no changes compared to master')
         string(name: "OECI_LIB_VERSION", defaultValue: 'master', description: 'Version of OE Libraries to use', trim: true)
         string(name: 'UBUNTU_NONSGX_CUSTOM_LABEL', defaultValue: '', description: '[Optional] Jenkins agent label to use for Ubuntu 20.04 without SGX.', trim: true)
     }
     stages {
-        stage('Run tests') {
+        stage('Run') {
             parallel {
                 stage('Checks') {
-                    steps {
-                        script {
-                            parallel "Check CI": { tests.checkCI() },
-                                     "Check Developer Experience Ubuntu 20.04": { tests.checkDevFlows('20.04') },
-                                     "Check Developer Experience Ubuntu 18.04": { tests.checkDevFlows('18.04') }
+                    stages {
+                        stage('Init') {
+                            steps {
+                                cleanWs()
+                            }
+                        }
+                        stage('Run') {
+                            steps {
+                                script {
+                                    parallel([
+                                        "Check CI": { tests.checkCI() },
+                                        "Check Developer Experience Ubuntu 20.04": { tests.checkDevFlows('20.04') },
+                                        "Check Developer Experience Ubuntu 18.04": { tests.checkDevFlows('18.04') }
+                                    ])
+                                }
+                            }
                         }
                     }
                 }
                 stage('AArch64 GNU') {
-                    steps {
-                        script {
-                            parallel "AArch64 2004 GNU gcc Debug":          { tests.AArch64GNUTest('20.04', 'Debug') },
-                                     "AArch64 1804 GNU gcc Debug":          { tests.AArch64GNUTest('18.04', 'Debug') },
-                                     "AArch64 2004 GNU gcc RelWithDebInfo": { tests.AArch64GNUTest('20.04', 'RelWithDebInfo') },
-                                     "AArch64 1804 GNU gcc RelWithDebInfo": { tests.AArch64GNUTest('18.04', 'RelWithDebInfo') }
-
+                    stages {
+                        stage('Init') {
+                            steps {
+                                cleanWs()
+                            }
+                        }
+                        stage('Run') {
+                            steps {
+                                script {
+                                    parallel "AArch64 2004 GNU gcc Debug":          { tests.AArch64GNUTest('20.04', 'Debug') },
+                                            "AArch64 1804 GNU gcc Debug":          { tests.AArch64GNUTest('18.04', 'Debug') },
+                                            "AArch64 2004 GNU gcc RelWithDebInfo": { tests.AArch64GNUTest('20.04', 'RelWithDebInfo') },
+                                            "AArch64 1804 GNU gcc RelWithDebInfo": { tests.AArch64GNUTest('18.04', 'RelWithDebInfo') }
+                                }
+                            }
                         }
                     }
                 }
                 stage('Simulations') {
-                    steps {
-                        script {
-                            if ( params.FULL_TEST_SUITE ) {
-                                def LVI_SKIP_TESTS = OFF
-                            } else {
-                                def LVI_SKIP_TESTS = ON
+                    stages {
+                        stage('Init') {
+                            steps {
+                                cleanWs()
                             }
-                            def tests = [
-                                "Sim 1804 clang-10 SGX1 RelWithDebInfo":             { tests.simulationContainerTest('18.04', 'RelWithDebInfo', ['-DHAS_QUOTE_PROVIDER=OFF', '-DLVI_MITIGATION=None', "-DLVI_MITIGATION_SKIP_TESTS=${LVI_SKIP_TESTS}"]) },
-                                "Sim 1804 clang-10 SGX1FLC Debug":                   { tests.simulationContainerTest('18.04', 'Debug',          ['-DHAS_QUOTE_PROVIDER=ON',  '-DLVI_MITIGATION=None', "-DLVI_MITIGATION_SKIP_TESTS=${LVI_SKIP_TESTS}"]) },
-                                "Sim 2004 clang-10 SGX1FLC RelWithDebInfo":          { tests.simulationContainerTest('20.04', 'RelWithDebInfo', ['-DHAS_QUOTE_PROVIDER=ON',  '-DLVI_MITIGATION=None', "-DLVI_MITIGATION_SKIP_TESTS=${LVI_SKIP_TESTS}"]) },
-                                "Sim 2004 clang-10 SGX1FLC RelWithDebInfo snmalloc": { tests.simulationContainerTest('20.04', 'RelWithDebInfo', ['-DHAS_QUOTE_PROVIDER=ON',  '-DLVI_MITIGATION=None', "-DLVI_MITIGATION_SKIP_TESTS=${LVI_SKIP_TESTS}", '-DUSE_SNMALLOC=ON']) }
-                            ]
-                            def full_tests = [
-                                "Sim 2004 clang-10 SGX1 Debug":                      { tests.simulationContainerTest('20.04', 'Debug',          ['-DHAS_QUOTE_PROVIDER=OFF', '-DLVI_MITIGATION=None', '-DLVI_MITIGATION_SKIP_TESTS=OFF']) },
-                                "Sim 2004 clang-10 SGX1 RelWithDebInfo":             { tests.simulationContainerTest('20.04', 'RelWithDebInfo', ['-DHAS_QUOTE_PROVIDER=OFF', '-DLVI_MITIGATION=None', '-DLVI_MITIGATION_SKIP_TESTS=OFF']) },
-                                "Sim 2004 clang-10 SGX1FLC Debug":                   { tests.simulationContainerTest('20.04', 'Debug',          ['-DHAS_QUOTE_PROVIDER=ON',  '-DLVI_MITIGATION=None', '-DLVI_MITIGATION_SKIP_TESTS=OFF']) },
-                                "Sim 2004 clang-10 SGX1FLC Debug snmalloc":          { tests.simulationContainerTest('20.04', 'Debug',          ['-DHAS_QUOTE_PROVIDER=ON',  '-DLVI_MITIGATION=None', '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=ON']) },
-                                "Sim 1804 clang-10 SGX1FLC Debug snmalloc":          { tests.simulationContainerTest('18.04', 'Debug',          ['-DHAS_QUOTE_PROVIDER=ON',  '-DLVI_MITIGATION=None', '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=ON']) },
-                                "Sim 1804 clang-10 SGX1FLC RelWithDebInfo":          { tests.simulationContainerTest('18.04', 'RelWithDebInfo', ['-DHAS_QUOTE_PROVIDER=ON',  '-DLVI_MITIGATION=None', '-DLVI_MITIGATION_SKIP_TESTS=OFF']) },
-                                "Sim 1804 clang-10 SGX1FLC RelWithDebInfo snmalloc": { tests.simulationContainerTest('18.04', 'RelWithDebInfo', ['-DHAS_QUOTE_PROVIDER=ON',  '-DLVI_MITIGATION=None', '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=ON']) }
-                            ]
-                            if ( params.FULL_TEST_SUITE ) {
-                                parallel tests + full_tests
-                            } else {
-                                parallel tests
+                        }
+                        stage('Run') {          
+                            steps {
+                                script {
+                                    if ( params.FULL_TEST_SUITE ) {
+                                        def LVI_SKIP_TESTS = OFF
+                                    } else {
+                                        def LVI_SKIP_TESTS = ON
+                                    }
+                                    def tests = [
+                                        "Sim 1804 clang-10 SGX1 RelWithDebInfo":             { tests.simulationContainerTest('18.04', 'RelWithDebInfo', ['-DHAS_QUOTE_PROVIDER=OFF', '-DLVI_MITIGATION=None', "-DLVI_MITIGATION_SKIP_TESTS=${LVI_SKIP_TESTS}"]) },
+                                        "Sim 1804 clang-10 SGX1FLC Debug":                   { tests.simulationContainerTest('18.04', 'Debug',          ['-DHAS_QUOTE_PROVIDER=ON',  '-DLVI_MITIGATION=None', "-DLVI_MITIGATION_SKIP_TESTS=${LVI_SKIP_TESTS}"]) },
+                                        "Sim 2004 clang-10 SGX1FLC RelWithDebInfo":          { tests.simulationContainerTest('20.04', 'RelWithDebInfo', ['-DHAS_QUOTE_PROVIDER=ON',  '-DLVI_MITIGATION=None', "-DLVI_MITIGATION_SKIP_TESTS=${LVI_SKIP_TESTS}"]) },
+                                        "Sim 2004 clang-10 SGX1FLC RelWithDebInfo snmalloc": { tests.simulationContainerTest('20.04', 'RelWithDebInfo', ['-DHAS_QUOTE_PROVIDER=ON',  '-DLVI_MITIGATION=None', "-DLVI_MITIGATION_SKIP_TESTS=${LVI_SKIP_TESTS}", '-DUSE_SNMALLOC=ON']) }
+                                    ]
+                                    def full_tests = [
+                                        "Sim 2004 clang-10 SGX1 Debug":                      { tests.simulationContainerTest('20.04', 'Debug',          ['-DHAS_QUOTE_PROVIDER=OFF', '-DLVI_MITIGATION=None', '-DLVI_MITIGATION_SKIP_TESTS=OFF']) },
+                                        "Sim 2004 clang-10 SGX1 RelWithDebInfo":             { tests.simulationContainerTest('20.04', 'RelWithDebInfo', ['-DHAS_QUOTE_PROVIDER=OFF', '-DLVI_MITIGATION=None', '-DLVI_MITIGATION_SKIP_TESTS=OFF']) },
+                                        "Sim 2004 clang-10 SGX1FLC Debug":                   { tests.simulationContainerTest('20.04', 'Debug',          ['-DHAS_QUOTE_PROVIDER=ON',  '-DLVI_MITIGATION=None', '-DLVI_MITIGATION_SKIP_TESTS=OFF']) },
+                                        "Sim 2004 clang-10 SGX1FLC Debug snmalloc":          { tests.simulationContainerTest('20.04', 'Debug',          ['-DHAS_QUOTE_PROVIDER=ON',  '-DLVI_MITIGATION=None', '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=ON']) },
+                                        "Sim 1804 clang-10 SGX1FLC Debug snmalloc":          { tests.simulationContainerTest('18.04', 'Debug',          ['-DHAS_QUOTE_PROVIDER=ON',  '-DLVI_MITIGATION=None', '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=ON']) },
+                                        "Sim 1804 clang-10 SGX1FLC RelWithDebInfo":          { tests.simulationContainerTest('18.04', 'RelWithDebInfo', ['-DHAS_QUOTE_PROVIDER=ON',  '-DLVI_MITIGATION=None', '-DLVI_MITIGATION_SKIP_TESTS=OFF']) },
+                                        "Sim 1804 clang-10 SGX1FLC RelWithDebInfo snmalloc": { tests.simulationContainerTest('18.04', 'RelWithDebInfo', ['-DHAS_QUOTE_PROVIDER=ON',  '-DLVI_MITIGATION=None', '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=ON']) }
+                                    ]
+                                    if ( params.FULL_TEST_SUITE ) {
+                                        parallel tests + full_tests
+                                    } else {
+                                        parallel tests
+                                    }
+                                }
                             }
                         }
                     }
                 }
                 stage('Cross Platform Build') {
-                    steps {
-                        script {
-                            def tests = [
-                                "Ubuntu 1804 Cross Platform Build": { tests.buildCrossPlatform("18.04") }
-                            ]
-                            def full_tests = [
-                                "Ubuntu 2004 Cross Platform Build": { tests.buildCrossPlatform("20.04") }
-                            ]
-                            if ( params.FULL_TEST_SUITE ) {
-                                parallel tests + full_tests
-                            } else {
-                                parallel tests
+                    stages {
+                        stage('Init') {
+                            steps {
+                                cleanWs()
+                            }
+                        }
+                        stage('Run') {
+                            steps {
+                                script {
+                                    def tests = [
+                                        "Ubuntu 1804 Cross Platform Build": { tests.buildCrossPlatform("18.04") }
+                                    ]
+                                    def full_tests = [
+                                        "Ubuntu 2004 Cross Platform Build": { tests.buildCrossPlatform("20.04") }
+                                    ]
+                                    if ( params.FULL_TEST_SUITE ) {
+                                        parallel tests + full_tests
+                                    } else {
+                                        parallel tests
+                                    }
+                                }
                             }
                         }
                     }
