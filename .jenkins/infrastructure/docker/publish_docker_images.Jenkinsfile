@@ -138,7 +138,14 @@ pipeline {
                 }
             }
         }
-        stage('Publish') {
+        stage('Publish version file') {
+            when {
+                anyOf {
+                    expression { return params.PUBLISH_LINUX }
+                    expression { return params.PUBLISH_WINDOWS }
+                }
+                expression { return params.PUBLISH_VERSION_FILE }
+            }
             stages {   
                 stage('Init') {
                     steps {
@@ -154,24 +161,34 @@ pipeline {
                 stage('Add details') {
                     steps {
                         script {
-                            BASE_2004_PSW  = helpers.dockerGetAptPackageVersion("${PUBLIC_REPO_NAME}/openenclave-base-ubuntu-20.04:${params.PUBLIC_LINUX_TAG}", "libsgx-enclave-common")
-                            BASE_2004_DCAP = helpers.dockerGetAptPackageVersion("${PUBLIC_REPO_NAME}/openenclave-base-ubuntu-20.04:${params.PUBLIC_LINUX_TAG}", "libsgx-ae-id-enclave")
-                            BASE_1804_PSW  = helpers.dockerGetAptPackageVersion("${PUBLIC_REPO_NAME}/openenclave-base-ubuntu-18.04:${params.PUBLIC_LINUX_TAG}", "libsgx-enclave-common")
-                            BASE_1804_DCAP = helpers.dockerGetAptPackageVersion("${PUBLIC_REPO_NAME}/openenclave-base-ubuntu-18.04:${params.PUBLIC_LINUX_TAG}", "libsgx-ae-id-enclave")
-                            FULL_2004_PSW  = helpers.dockerGetAptPackageVersion("${PUBLIC_REPO_NAME}/oetools-20.04:${params.PUBLIC_LINUX_TAG}", "libsgx-enclave-common")
-                            FULL_2004_DCAP = helpers.dockerGetAptPackageVersion("${PUBLIC_REPO_NAME}/oetools-20.04:${params.PUBLIC_LINUX_TAG}", "libsgx-ae-id-enclave")
-                            FULL_1804_PSW  = helpers.dockerGetAptPackageVersion("${PUBLIC_REPO_NAME}/oetools-18.04:${params.PUBLIC_LINUX_TAG}", "libsgx-enclave-common")
-                            FULL_1804_DCAP = helpers.dockerGetAptPackageVersion("${PUBLIC_REPO_NAME}/oetools-18.04:${params.PUBLIC_LINUX_TAG}", "libsgx-ae-id-enclave")
+                            sh """
+                                echo "\$(head -n 2 DOCKER_IMAGES.md)" > DOCKER_IMAGES_new.md
+                            """
+                            if (params.PUBLISH_WINDOWS) {
+                                sh """
+                                echo "| Windows Server 2019 | ${PUBLIC_REPO_NAME}/oetools-ws2019:${PUBLIC_WINDOWS_TAG} | ${OE_VERSION} | None | None |" >> DOCKER_IMAGES_new.md
+                                """
+                            }
+                            if (params.PUBLISH_LINUX) {
+                                BASE_2004_PSW  = helpers.dockerGetAptPackageVersion("${PUBLIC_REPO_NAME}/openenclave-base-ubuntu-20.04:${params.PUBLIC_LINUX_TAG}", "libsgx-enclave-common")
+                                BASE_2004_DCAP = helpers.dockerGetAptPackageVersion("${PUBLIC_REPO_NAME}/openenclave-base-ubuntu-20.04:${params.PUBLIC_LINUX_TAG}", "libsgx-ae-id-enclave")
+                                BASE_1804_PSW  = helpers.dockerGetAptPackageVersion("${PUBLIC_REPO_NAME}/openenclave-base-ubuntu-18.04:${params.PUBLIC_LINUX_TAG}", "libsgx-enclave-common")
+                                BASE_1804_DCAP = helpers.dockerGetAptPackageVersion("${PUBLIC_REPO_NAME}/openenclave-base-ubuntu-18.04:${params.PUBLIC_LINUX_TAG}", "libsgx-ae-id-enclave")
+                                FULL_2004_PSW  = helpers.dockerGetAptPackageVersion("${PUBLIC_REPO_NAME}/oetools-20.04:${params.PUBLIC_LINUX_TAG}", "libsgx-enclave-common")
+                                FULL_2004_DCAP = helpers.dockerGetAptPackageVersion("${PUBLIC_REPO_NAME}/oetools-20.04:${params.PUBLIC_LINUX_TAG}", "libsgx-ae-id-enclave")
+                                FULL_1804_PSW  = helpers.dockerGetAptPackageVersion("${PUBLIC_REPO_NAME}/oetools-18.04:${params.PUBLIC_LINUX_TAG}", "libsgx-enclave-common")
+                                FULL_1804_DCAP = helpers.dockerGetAptPackageVersion("${PUBLIC_REPO_NAME}/oetools-18.04:${params.PUBLIC_LINUX_TAG}", "libsgx-ae-id-enclave")
+                                sh """
+                                    echo "| Base Ubuntu 20.04 | ${PUBLIC_REPO_NAME}/openenclave-base-ubuntu-20.04:${PUBLIC_LINUX_TAG} | ${OE_VERSION} | ${BASE_2004_PSW} | ${BASE_2004_DCAP} |" >> DOCKER_IMAGES_new.md
+                                    echo "| Base Ubuntu 18.04 | ${PUBLIC_REPO_NAME}/openenclave-base-ubuntu-18.04:${PUBLIC_LINUX_TAG} | ${OE_VERSION} | ${BASE_1804_PSW} | ${BASE_1804_DCAP} |" >> DOCKER_IMAGES_new.md
+                                    echo "| Full Ubuntu 20.04 | ${PUBLIC_REPO_NAME}/oetools-20.04:${PUBLIC_LINUX_TAG} | ${OE_VERSION} | ${FULL_2004_PSW} | ${FULL_2004_DCAP} |" >> DOCKER_IMAGES_new.md
+                                    echo "| Full Ubuntu 18.04 | ${PUBLIC_REPO_NAME}/oetools-18.04:${PUBLIC_LINUX_TAG} | ${OE_VERSION} | ${FULL_1804_PSW} | ${FULL_1804_DCAP} |" >> DOCKER_IMAGES_new.md
+                                """
+                            }
                         }
                         sh """
-                            echo "\$(head -n 2 DOCKER_IMAGES.md)" > DOCKER_IMAGES_new.md
-                            echo "| Base Ubuntu 20.04 | ${PUBLIC_REPO_NAME}/openenclave-base-ubuntu-20.04:${PUBLIC_LINUX_TAG} | ${OE_VERSION} | ${BASE_2004_PSW} | ${BASE_2004_DCAP} |" >> DOCKER_IMAGES_new.md
-                            echo "| Base Ubuntu 18.04 | ${PUBLIC_REPO_NAME}/openenclave-base-ubuntu-18.04:${PUBLIC_LINUX_TAG} | ${OE_VERSION} | ${BASE_1804_PSW} | ${BASE_1804_DCAP} |" >> DOCKER_IMAGES_new.md
-                            echo "| Full Ubuntu 20.04 | ${PUBLIC_REPO_NAME}/oetools-20.04:${PUBLIC_LINUX_TAG} | ${OE_VERSION} | ${FULL_2004_PSW} | ${FULL_2004_DCAP} |" >> DOCKER_IMAGES_new.md
-                            echo "| Full Ubuntu 18.04 | ${PUBLIC_REPO_NAME}/oetools-18.04:${PUBLIC_LINUX_TAG} | ${OE_VERSION} | ${FULL_1804_PSW} | ${FULL_1804_DCAP} |" >> DOCKER_IMAGES_new.md
-                            echo "| Windows Server 2019 | ${PUBLIC_REPO_NAME}/oetools-ws2019:${PUBLIC_WINDOWS_TAG} | ${OE_VERSION} | None | None |" >> DOCKER_IMAGES_new.md
-                            echo "\$(tail -n +3 DOCKER_IMAGES.md)" >> DOCKER_IMAGES_new.md
                             mv DOCKER_IMAGES_new.md DOCKER_IMAGES.md
+                            echo "\$(tail -n +3 DOCKER_IMAGES.md)" >> DOCKER_IMAGES_new.md
                         """
                     }
                 }
