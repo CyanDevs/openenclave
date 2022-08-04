@@ -52,7 +52,7 @@ pipeline {
                                 }
                             }
                         }
-                        stage('Push tag') {
+                        stage('Push tag to public repo') {
                             steps {
                                 script {
                                     docker.withRegistry(params.PUBLIC_REPO, params.PUBLIC_REPO_CRED_ID) {
@@ -70,7 +70,10 @@ pipeline {
                                 }
                             }
                         }
-                        stage('Push latest') {
+                        stage('Push latest to public repo') {
+                            when {
+                                expression { return params.TAG_LATEST }
+                            }
                             steps {
                                 script {
                                     docker.withRegistry(params.PUBLIC_REPO, params.PUBLIC_REPO_CRED_ID) {
@@ -83,6 +86,48 @@ pipeline {
                                             docker push ${PUBLIC_REPO_NAME}/openenclave-base-ubuntu-18.04:latest
                                             docker push ${PUBLIC_REPO_NAME}/oetools-20.04:latest
                                             docker push ${PUBLIC_REPO_NAME}/oetools-18.04:latest
+                                        """
+                                    }
+                                }
+                            }
+                        }
+                        stage('Push tag to internal repo') {
+                            when {
+                                expression { return params.INTERNAL_LINUX_TAG != params.PUBLIC_LINUX_TAG }
+                            }
+                            steps {
+                                script {
+                                    docker.withRegistry(params.INTERNAL_REPO, params.INTERNAL_REPO_CRED_ID) {
+                                        sh """
+                                            docker tag ${INTERNAL_REPO_NAME}/openenclave-base-ubuntu-20.04:${params.PUBLIC_LINUX_TAG} ${INTERNAL_REPO_NAME}/openenclave-base-ubuntu-20.04:${params.PUBLIC_LINUX_TAG}
+                                            docker tag ${INTERNAL_REPO_NAME}/openenclave-base-ubuntu-18.04:${params.PUBLIC_LINUX_TAG} ${INTERNAL_REPO_NAME}/openenclave-base-ubuntu-18.04:${params.PUBLIC_LINUX_TAG}
+                                            docker tag ${INTERNAL_REPO_NAME}/oetools-20.04:${params.PUBLIC_LINUX_TAG} ${INTERNAL_REPO_NAME}/oetools-20.04:${params.PUBLIC_LINUX_TAG}
+                                            docker tag ${INTERNAL_REPO_NAME}/oetools-18.04:${params.PUBLIC_LINUX_TAG} ${INTERNAL_REPO_NAME}/oetools-18.04:${params.PUBLIC_LINUX_TAG}
+                                            docker push ${INTERNAL_REPO_NAME}/openenclave-base-ubuntu-20.04:${params.PUBLIC_LINUX_TAG}
+                                            docker push ${INTERNAL_REPO_NAME}/openenclave-base-ubuntu-18.04:${params.PUBLIC_LINUX_TAG}
+                                            docker push ${INTERNAL_REPO_NAME}/oetools-20.04:${params.PUBLIC_LINUX_TAG}
+                                            docker push ${INTERNAL_REPO_NAME}/oetools-18.04:${params.PUBLIC_LINUX_TAG}
+                                        """
+                                    }
+                                }
+                            }
+                        }
+                        stage('Push latest to internal repo') {
+                            when {
+                                expression { return params.TAG_LATEST }
+                            }
+                            steps {
+                                script {
+                                    docker.withRegistry(params.INTERNAL_REPO, params.INTERNAL_REPO_CRED_ID) {
+                                        sh """
+                                            docker tag ${INTERNAL_REPO_NAME}/openenclave-base-ubuntu-20.04:${params.PUBLIC_LINUX_TAG} ${INTERNAL_REPO_NAME}/openenclave-base-ubuntu-20.04:latest
+                                            docker tag ${INTERNAL_REPO_NAME}/openenclave-base-ubuntu-18.04:${params.PUBLIC_LINUX_TAG} ${INTERNAL_REPO_NAME}/openenclave-base-ubuntu-18.04:latest
+                                            docker tag ${INTERNAL_REPO_NAME}/oetools-20.04:${params.PUBLIC_LINUX_TAG} ${INTERNAL_REPO_NAME}/oetools-20.04:latest
+                                            docker tag ${INTERNAL_REPO_NAME}/oetools-18.04:${params.PUBLIC_LINUX_TAG} ${INTERNAL_REPO_NAME}/oetools-18.04:latest
+                                            docker push ${INTERNAL_REPO_NAME}/openenclave-base-ubuntu-20.04:latest
+                                            docker push ${INTERNAL_REPO_NAME}/openenclave-base-ubuntu-18.04:latest
+                                            docker push ${INTERNAL_REPO_NAME}/oetools-20.04:latest
+                                            docker push ${INTERNAL_REPO_NAME}/oetools-18.04:latest
                                         """
                                     }
                                 }
@@ -110,7 +155,7 @@ pipeline {
                                 }
                             }
                         }
-                        stage('Push tag') {
+                        stage('Push tag to public repo') {
                             steps {
                                 script {
                                     docker.withRegistry(params.PUBLIC_REPO, params.PUBLIC_REPO_CRED_ID) {
@@ -122,7 +167,7 @@ pipeline {
                                 }
                             }
                         }
-                        stage('Push latest') {
+                        stage('Push latest to public repo') {
                             when {
                                 expression { return params.TAG_LATEST }
                             }
@@ -132,6 +177,36 @@ pipeline {
                                         powershell """
                                             docker tag ${PUBLIC_REPO_NAME}/oetools-ws2019:${params.PUBLIC_WINDOWS_TAG} ${PUBLIC_REPO_NAME}/oetools-ws2019:latest
                                             docker push ${PUBLIC_REPO_NAME}/oetools-ws2019:latest
+                                        """
+                                    }
+                                }
+                            }
+                        }
+                        stage('Push tag to internal repo') {
+                            when {
+                                expression { return params.INTERNAL_WINDOWS_TAG != params.PUBLIC_WINDOWS_TAG }
+                            }
+                            steps {
+                                script {
+                                    docker.withRegistry(params.INTERNAL_REPO, params.INTERNAL_REPO_CRED_ID) {
+                                        powershell """
+                                            docker tag ${INTERNAL_REPO_NAME}/oetools-ws2019:${params.INTERNAL_WINDOWS_TAG} ${INTERNAL_REPO_NAME}/oetools-ws2019:${params.PUBLIC_WINDOWS_TAG}
+                                            docker push ${INTERNAL_REPO_NAME}/oetools-ws2019:${params.PUBLIC_WINDOWS_TAG}
+                                        """
+                                    }
+                                }
+                            }
+                        }
+                        stage('Push latest to internal repo') {
+                            when {
+                                expression { return params.TAG_LATEST }
+                            }
+                            steps {
+                                script {
+                                    docker.withRegistry(params.INTERNAL_REPO, params.INTERNAL_REPO_CRED_ID) {
+                                        powershell """
+                                            docker tag ${INTERNAL_REPO_NAME}/oetools-ws2019:${params.INTERNAL_WINDOWS_TAG} ${INTERNAL_REPO_NAME}/oetools-ws2019:latest
+                                            docker push ${INTERNAL_REPO_NAME}/oetools-ws2019:latest
                                         """
                                     }
                                 }
