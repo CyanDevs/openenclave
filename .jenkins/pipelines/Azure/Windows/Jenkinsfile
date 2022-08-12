@@ -37,10 +37,10 @@ try{
         stage("PR Testing") {
             testing_stages += [
                 "Win2019 Ubuntu1804 clang-10 RelWithDebInfo Linux-Elf-build LVI":    { tests.windowsLinuxElfBuild('acc-win2019-dcap', '18.04', 'clang-10', 'RelWithDebInfo', 'ControlFlow', 'ON') },
-                "Win2019 Sim RelWithDebInfo Cross Compile LVI ":                     { tests.windowsCrossCompile('acc-win2019', 'RelWithDebInfo', 'ControlFlow', '1', 'ON') },
-                "Win2019 Debug Cross Compile DCAP LVI":                              { tests.windowsCrossCompile('acc-win2019', 'Debug',          'ControlFlow', '0', 'ON') },
-                "Win2019 RelWithDebInfo Cross Compile DCAP LVI FULL Tests":          { tests.windowsCrossCompile('acc-win2019', 'RelWithDebInfo', 'ControlFlow') },
-                "Win2019 RelWithDebInfo Cross Compile DCAP LVI FULL Tests snmalloc": { tests.windowsCrossCompile('acc-win2019', 'RelWithDebInfo', 'ControlFlow', '0', 'OFF', ['-DUSE_SNMALLOC=ON']) }
+                // "Win2019 Sim RelWithDebInfo Cross Compile LVI ":                     { tests.windowsCrossCompile('acc-win2019', 'RelWithDebInfo', 'ControlFlow', '1', 'ON') },
+                // "Win2019 Debug Cross Compile DCAP LVI":                              { tests.windowsCrossCompile('acc-win2019', 'Debug',          'ControlFlow', '0', 'ON') },
+                // "Win2019 RelWithDebInfo Cross Compile DCAP LVI FULL Tests":          { tests.windowsCrossCompile('acc-win2019', 'RelWithDebInfo', 'ControlFlow') },
+                // "Win2019 RelWithDebInfo Cross Compile DCAP LVI FULL Tests snmalloc": { tests.windowsCrossCompile('acc-win2019', 'RelWithDebInfo', 'ControlFlow', '0', 'OFF', ['-DUSE_SNMALLOC=ON']) }
             ]
             parallel testing_stages
         }
