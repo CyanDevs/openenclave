@@ -9,6 +9,25 @@
 #           -DPREFIX_DIR=/opt/openenclave \
 #           -P ~/openenclave/samples/test-samples.cmake
 
+if (WIN32)
+  # cmake documentation says that CMAKE_FIND_LIBRARY_SUFFIXES is typically .lib
+  # and .dll.
+  # https://cmake.org/cmake/help/v3.12/variable/CMAKE_FIND_LIBRARY_SUFFIXES.html
+  # However, it is initialized to only .lib on Windows. Therefore, we explicitly
+  # set the suffix to .dll.
+  # See also: http://cmake.3232098.n2.nabble.com/find-library-doesn-t-find-dll-on-windows-td7597643.html
+  set(CMAKE_FIND_LIBRARY_SUFFIXES ".dll")
+  message("Set CMAKE_FIND_LIBRARY_SUFFIXES to .dll")
+endif ()
+
+message("${CMAKE_FIND_LIBRARY_SUFFIXES}")
+
+find_library(
+  SGX_DCAP_QL
+  NAMES sgx_dcap_ql
+  PATH_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES}
+  REQUIRED
+)
 # Determine whether DCAP quote provider libraries are available in the system.
 # Delete the file and create afresh so that DCAP libraries are checked
 # every time samples test is run.
