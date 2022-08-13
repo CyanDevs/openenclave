@@ -1,6 +1,9 @@
 # Copyright (c) Open Enclave SDK contributors.
 # Licensed under the MIT License.
 
+cmake_minimum_required(VERSION 3.13)
+project("Check Quote Provider")
+
 # This script requires the variables SOURCE_DIR, BUILD_DIR,
 # COMPILER_SUPPORTS_SNMALLOC, USE_DEBUG_MALLOC and PREFIX_DIR to be defined:
 #
@@ -28,6 +31,8 @@ find_library(
   PATH_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES}
   REQUIRED
 )
+message("${SGX_DCAP_QL}")
+
 # Determine whether DCAP quote provider libraries are available in the system.
 # Delete the file and create afresh so that DCAP libraries are checked
 # every time samples test is run.
