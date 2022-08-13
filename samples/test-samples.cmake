@@ -1,9 +1,6 @@
 # Copyright (c) Open Enclave SDK contributors.
 # Licensed under the MIT License.
 
-cmake_minimum_required(VERSION 3.12)
-project("Check Quote Provider")
-
 # This script requires the variables SOURCE_DIR, BUILD_DIR,
 # COMPILER_SUPPORTS_SNMALLOC, USE_DEBUG_MALLOC and PREFIX_DIR to be defined:
 #
@@ -11,27 +8,6 @@ project("Check Quote Provider")
 #           -DBUILD_DIR=~/openenclave/build
 #           -DPREFIX_DIR=/opt/openenclave \
 #           -P ~/openenclave/samples/test-samples.cmake
-
-if (WIN32)
-  # cmake documentation says that CMAKE_FIND_LIBRARY_SUFFIXES is typically .lib
-  # and .dll.
-  # https://cmake.org/cmake/help/v3.12/variable/CMAKE_FIND_LIBRARY_SUFFIXES.html
-  # However, it is initialized to only .lib on Windows. Therefore, we explicitly
-  # set the suffix to .dll.
-  # See also: http://cmake.3232098.n2.nabble.com/find-library-doesn-t-find-dll-on-windows-td7597643.html
-  set(CMAKE_FIND_LIBRARY_SUFFIXES ".dll")
-  message("Set CMAKE_FIND_LIBRARY_SUFFIXES to .dll")
-endif ()
-
-message("${CMAKE_FIND_LIBRARY_SUFFIXES}")
-
-find_library(
-  SGX_DCAP_QL
-  NAMES sgx_dcap_ql
-  PATH_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES}
-  REQUIRED
-)
-message("${SGX_DCAP_QL}")
 
 # Determine whether DCAP quote provider libraries are available in the system.
 # Delete the file and create afresh so that DCAP libraries are checked
@@ -46,7 +22,7 @@ configure_file(${SOURCE_DIR}/check_quote_provider.cmake
 execute_process(
   COMMAND ${CMAKE_COMMAND} .
   WORKING_DIRECTORY check_quote_provider
-  OUTPUT_QUIET ERROR_QUIET
+  # OUTPUT_QUIET ERROR_QUIET
   RESULT_VARIABLE COMMAND_EXIT_CODE)
 
 if (COMMAND_EXIT_CODE EQUAL 0)

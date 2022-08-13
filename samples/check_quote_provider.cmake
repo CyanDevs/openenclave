@@ -13,14 +13,14 @@ if (WIN32)
   set(CMAKE_FIND_LIBRARY_SUFFIXES ".dll")
 endif ()
 
-message("${CMAKE_FIND_LIBRARY_SUFFIXES}")
-
 find_library(
   SGX_DCAP_QL
   NAMES sgx_dcap_ql
   PATH_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES}
   REQUIRED
 )
+
+message(STATUS "Found SGX_DCAP_QL: ${SGX_DCAP_QL}")
 
 # Raise fatal error if sgx_dcap_ql library is not found.
 if (NOT SGX_DCAP_QL)
