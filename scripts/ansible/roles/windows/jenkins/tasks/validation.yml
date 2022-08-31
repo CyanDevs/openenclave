@@ -10,4 +10,4 @@
     path: "{{ item }}"
   with_items: "{{ validation_binaries }}"
   register: file
-  failed_when: not file.stat.isreg
+  failed_when: not file.stat.exists and not file.stat.isreg

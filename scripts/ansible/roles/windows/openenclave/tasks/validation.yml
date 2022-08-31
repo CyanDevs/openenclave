@@ -10,14 +10,14 @@
     path: "{{ item }}"
   with_items: "{{ validation_directories }}"
   register: directory
-  failed_when: not directory.stat.isdir
+  failed_when: not directory.stat.exists and not directory.stat.isdir
 
 - name: Check for existing required executables and files
   ansible.windows.win_stat:
     path: "{{ item }}"
   with_items: "{{ validation_binaries + validation_files }}"
   register: file
-  failed_when: not file.stat.isreg
+  failed_when: not file.stat.exists and not file.stat.isreg
 
 - name: CMake version check
   ansible.windows.win_command: vcvars64.bat x64 && cmake --version
