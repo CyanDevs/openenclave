@@ -36,6 +36,11 @@ pipeline {
         }
         stage("Build Windows Server 2019 Docker Image") {
             steps {
+                powershell """
+                    New-Item -Path build\\scripts -ItemType Directory
+                    Copy-Item -Path scripts\\install-windows-prereqs.ps1 -Destination build\\scripts\\install-windows-prereqs.ps1
+                    cd build
+                """
                 script {
                     oe2019 = common.dockerImage("oetools-ws2019:${TAG_FULL_IMAGE}", ".jenkins/infrastructure/docker/dockerfiles/windows/Dockerfile")
                 }
