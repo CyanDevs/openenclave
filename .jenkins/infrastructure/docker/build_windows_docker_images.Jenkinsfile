@@ -51,7 +51,7 @@ pipeline {
                 script {
                     docker.withRegistry(params.INTERNAL_REPO, params.INTERNAL_REPO_CRED_ID) {
                         common.exec_with_retry { oe2019.push() }
-                        if ( TAG_LATEST ) {
+                        if ( params.TAG_LATEST ) {
                             common.exec_with_retry { oe2019.push('latest') }
                         }
                     }
