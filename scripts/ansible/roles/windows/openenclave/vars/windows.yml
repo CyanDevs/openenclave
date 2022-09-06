@@ -2,8 +2,8 @@
 # Licensed under the MIT License.
 
 ---
-cmake_target_version: 3.12.18081601
-ninja_target_version: 1.8.2
+cmake_target_version: 3.20.21032501
+ninja_target_version: 1.10.2
 clang_target_version: 10.0.0
 
 validation_directories:
