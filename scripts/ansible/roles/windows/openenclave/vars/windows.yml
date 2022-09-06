@@ -17,11 +17,11 @@ validation_directories:
 
 validation_files:
   - "C:\\Program Files\\LLVM\\lib\\libclang.lib"
-  - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Tools\\MSVC\\14.16.27023\\lib\\x64\\vcomp.lib"
+  - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Tools\\MSVC\\14.29.30133\\lib\\x64\\vcomp.lib"
 
 validation_binaries:
   - "C:\\Program Files\\LLVM\\bin\\clang.exe"
   - "C:\\Program Files\\LLVM\\bin\\llvm-ar.exe"
   - "C:\\Program Files\\shellcheck\\shellcheck.exe"
-  - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Tools\\MSVC\\14.16.27023\\bin\\Hostx64\\x64\\cl.exe"
-  - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Tools\\MSVC\\14.16.27023\\bin\\Hostx64\\x64\\link.exe"
+  - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Tools\\MSVC\\14.29.30133\\bin\\Hostx64\\x64\\link.exe"
+  - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Tools\\MSVC\\14.29.30133\\bin\\Hostx64\\x64\\cl.exe"
