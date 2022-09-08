@@ -451,10 +451,10 @@ def windowsPrereqsVerify(String label) {
     }
 }
 
-def windowsLinuxElfBuild(String label, String version, String compiler, String build_type, String lvi_mitigation = 'None', String lvi_mitigation_skip_tests = 'OFF', List extra_cmake_args = []) {
-    stage("Ubuntu ${version} SGX1 ${compiler} ${build_type} LVI_MITIGATION=${lvi_mitigation}") {
+def windowsLinuxElfBuild(String label, String ubuntu_label, String compiler, String build_type, String lvi_mitigation = 'None', String lvi_mitigation_skip_tests = 'OFF', List extra_cmake_args = []) {
+    stage("${ubuntu_label} ${compiler} ${build_type} LVI_MITIGATION=${lvi_mitigation}") {
         println(version)
-        node(globalvars.AGENTS_LABELS["ubuntu-nonsgx-${version}"]) {
+        node(ubuntu_label) {
             timeout(globalvars.GLOBAL_TIMEOUT_MINUTES) {
                 cleanWs()
                 checkout scm
@@ -502,10 +502,8 @@ def windowsLinuxElfBuild(String label, String version, String compiler, String b
 }
 
 def windowsCrossCompile(String label, String build_type, String lvi_mitigation = 'None', String OE_SIMULATION = "0", String lvi_mitigation_skip_tests = 'OFF', List extra_cmake_args = []) {
-    def node_label = globalvars.AGENTS_LABELS["${label}-dcap"]
-
     stage("Windows ${label} ${build_type} with SGX LVI_MITIGATION=${lvi_mitigation}") {
-        node(node_label) {
+        node(label) {
             withEnv(["OE_SIMULATION=${OE_SIMULATION}"]) {
                 timeout(globalvars.GLOBAL_TIMEOUT_MINUTES) {
                     // OFF value of quote provider until https://github.com/openenclave/openenclave-ci/pull/29 is merged
@@ -517,9 +515,8 @@ def windowsCrossCompile(String label, String build_type, String lvi_mitigation =
 }
 
 def windowsCrossPlatform(String label) {
-    def node_label = globalvars.AGENTS_LABELS[label]
-    stage("Windows ${node_label} Cross Plaform Build") {
-        node(node_label) {
+    stage("Windows ${label} Cross Plaform Build") {
+        node(label) {
             timeout(globalvars.GLOBAL_TIMEOUT_MINUTES) {
                 cleanWs()
                 checkout scm
