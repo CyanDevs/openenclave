@@ -141,7 +141,7 @@ def ACCPackageTest(String label, String version, List extra_cmake_args = []) {
     }
 }
 
-def ACCHostVerificationTest(String version, String build_type) {
+def ACCHostVerificationTest(String version, String build_type, String compiler) {
     /* Compile tests in SGX machine.  This will generate the necessary certs for the
     * host_verify test.
     */
@@ -170,7 +170,7 @@ def ACCHostVerificationTest(String version, String build_type) {
                            ../../../output/bin/oeutil gen --format sgx_ecdsa --quote-proc out --verify
                            popd
                            """
-                common.ContainerRun("oetools-${version}:${params.DOCKER_TAG}", "-10", task, runArgs)
+                common.ContainerRun("oetools-${version}:${params.DOCKER_TAG}", compiler, task, runArgs)
 
                 def ec_cert_created = fileExists 'build/tests/host_verify/host/sgx_cert_ec.der'
                 def rsa_cert_created = fileExists 'build/tests/host_verify/host/sgx_cert_rsa.der'

@@ -1,6 +1,3 @@
-# Copyright (c) Open Enclave SDK contributors.
-# Licensed under the MIT License.
-
 macro (detect_compiler BINDIR CC)
   set(GCC gcc)
   set(CLANG clang)
@@ -23,9 +20,11 @@ macro (detect_compiler BINDIR CC)
       # Build enclave applications. Try to search newer versions of clang/clang++.
       # Be consistent to the logic implemented by samples/config.mk.
       foreach (VERSION 11 10 9 8)
+        message(WARNING "Looking for version ${VERSION}")
         set(CLANG_VERSION "")
         if (EXISTS "${BINDIR}/${${COMPILER}}-${VERSION}")
           set(CLANG_VERSION ${VERSION})
+          message(WARNING "Found clang version ${BINDIR}/${${COMPILER}}-${VERSION}")
           break()
         endif ()
       endforeach ()
@@ -42,16 +41,18 @@ endmacro ()
 # Adopt customized compiler wrappers for LVI mitigation.
 function (configure_lvi_mitigation_build)
   cmake_parse_arguments(OE "IN_PACKAGE" "BINDIR" "" ${ARGN})
-
+  message(WARNING "Hello 1")
   if (NOT EXISTS "${OE_BINDIR}")
     message(FATAL_ERROR "${OE_BINDIR} does not exist.")
   endif ()
 
   if (NOT OE_IN_PACKAGE)
+    message(WARNING "Hello 2")
     # Default to clang-11 when building SDK.
     set(C_COMPILER clang-11)
     set(CXX_COMPILER clang++-11)
   else ()
+    message(WARNING "Hello 3")
     # Default to clang when building enclave applications.
     set(C_COMPILER clang)
     set(CXX_COMPILER clang++)
@@ -60,8 +61,10 @@ function (configure_lvi_mitigation_build)
   # Overwrite the default C compiler if CC is explicitly specified.
   # Otherwise, select the compiler based on the detection logic.
   if (DEFINED ENV{CC})
+    message(WARNING "Hello 4")
     get_filename_component(C_COMPILER $ENV{CC} NAME)
   else ()
+    message(WARNING "Hello 5")
     detect_compiler(${OE_BINDIR} C)
   endif ()
 
