@@ -95,6 +95,10 @@ if (OE_SGX)
   set_source_files_properties(sgx/td_basic.c PROPERTIES COMPILE_FLAGS
                                                         -fno-stack-protector)
 
+  message(
+    WARNING
+    "${CMAKE_C_COMPILER_VERSION}"
+  )
   # To avoid the `unused-command-line-argument` warning, which we treat as an
   # error, we explicitly turn off the warning when compiling these assembly
   # files.
