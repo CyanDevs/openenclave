@@ -118,6 +118,8 @@ if (CLANG_INTRINSIC_HEADERS_DIR)
   enclave_compile_options(oesymcryptengine PRIVATE
                           -I${CLANG_INTRINSIC_HEADERS_DIR})
 else ()
+  message(WARNING "Clang version ${CLANG_VERSION}")
+  message(WARNING "Clang search path ${CLANG_INTRINSIC_HEADERS_SEARCH_PATH}")
   message(
     FATAL_ERROR
       "Cannot find clang intrinstics header (required by SymCrypt OpenSSL engine)"
