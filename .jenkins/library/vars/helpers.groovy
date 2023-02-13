@@ -383,13 +383,15 @@ def releaseDownloadLinuxGitHub(String release_version, String oe_package, String
  *                          - "GitHub" to download from the Open Enclave Repository
  * @param os_id            The distribution name (e.g. Ubuntu)
  * @param os_release       The distribution version without "." (e.g. 1804)
+ * @param storage_account  [Optional] The name of the Azure storage account
+ * @param storage_blob     [Optional] The name of the blob in the Azure storage account
  */
-def releaseDownloadLinux(String release_version, String oe_package, String source, String os_id, String os_release) {
+def releaseDownloadLinux(String release_version, String oe_package, String source, String os_id, String os_release, String storage_account = "", String storage_blob = "") {
     // Determine distribution and version
     // Note: lsb_release is only available on Ubuntu.
     if(source == "Azure") {
         // Download from Open Enclave storage container
-        azureContainerDownload('releasecandidates', "${release_version}/${os_id}_${os_release}/*", 'openenclavereleaseblobcontainer')
+        azureContainerDownload(storage_account, "${release_version}/${os_id}_${os_release}/*", storage_blob)
         sh """
             find ${release_version}/${os_id}_${os_release} -name "*"
         """
@@ -455,11 +457,13 @@ def releaseDownloadWindowsGitHub(String release_version, String oe_package) {
  *                         - "Azure" to download from the Azure blob storage [Default]
  *                         - "GitHub" to download from the Open Enclave Repository
  * @param windows_version  The Windows version caption (output of "wmic os get caption")
+ * @param storage_account  [Optional] The name of the Azure storage account
+ * @param storage_blob     [Optional] The name of the blob in the Azure storage account
  */
-def releaseDownloadWindows(String release_version, String oe_package, String source, String windows_version) {
+def releaseDownloadWindows(String release_version, String oe_package, String source, String windows_version, String storage_account = "", String storage_blob = "") {
     if(source == "Azure") {
         // Download from Azure storage container
-        azureContainerDownload('releasecandidates', "${release_version}/${windows_version}/*", 'openenclavereleaseblobcontainer')
+        azureContainerDownload(storage_account, "${release_version}/${windows_version}/*", storage_blob)
     } else if(source == "GitHub") {
         // Download nuget packages from Open Enclave GitHub repository releaases
         releaseDownloadWindowsGitHub(release_version, oe_package)
@@ -479,8 +483,10 @@ def releaseDownloadWindows(String release_version, String oe_package, String sou
  * @param source           Which source to download Open Enclave from
  *                         - "Azure" to download from the Azure blob storage [Default]
  *                         - "GitHub" to download from the Open Enclave Repository
+ * @param storage_account  [Optional] The name of the Azure storage account
+ * @param storage_blob     [Optional] The name of the blob in the Azure storage account
  */
-def releaseInstall(String release_version = null, String oe_package = "open-enclave", String source = "Azure") {
+def releaseInstall(String release_version = null, String oe_package = "open-enclave", String source = "Azure", String storage_account = "", String storage_blob = "") {
     // Check parameters are valid
     if(!release_version) {
         error("[Error] Invalid Open Enclave release version defined!")
@@ -504,7 +510,7 @@ def releaseInstall(String release_version = null, String oe_package = "open-encl
                 returnStdout: true
             ).trim()
         // Download Open Enclave package
-        def downloadedFiles = releaseDownloadLinux(release_version, oe_package, source, os_id, os_release)
+        def downloadedFiles = releaseDownloadLinux(release_version, oe_package, source, os_id, os_release, storage_account, storage_blob)
         if(!downloadedFiles) {
             error("[Error] No files were downloaded!")
         } else {
