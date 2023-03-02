@@ -3,3 +3,7 @@
 
 ---
 gcc_target_version: "9.4.0"
+# For specifying distribution-specific packages
+apt_distribution_packages: []
+apt_arm_distribution_packages:
+  - "python3-crypto"
