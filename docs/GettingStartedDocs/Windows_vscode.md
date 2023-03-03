@@ -14,7 +14,6 @@ Install the following VS Code extensions. Click on an image to navigate to the V
 
 [![CMake Tools Extension](images/VSCodeCMakeToolsExtension.png)](https://marketplace.visualstudio.com/items?itemName=vector-of-bool.cmake-tools)
 
-[![CDB Extension](images/VSCodeCDBExtension.png)](https://marketplace.visualstudio.com/items?itemName=MicrosoftDebuggingPlatform.vscode-cdb)
 
 ## Launch Visual Studio Code and Configure
 
@@ -67,6 +66,8 @@ For example, if you ran install-windows-prereqs.ps1 with -InstallPath C:\openenc
 }
 ```
 
+You will need to use Ninja generator to build OE SDK. This can be set by finding the setting "CMake: Generator" and setting it to `Ninja`.
+
 Configure your workspace by typing "cmake configure" in the command palette
 
 ![CMake Configure](images/VSCodeCMakeConfigure.png)
@@ -108,61 +109,41 @@ If you installed the Open Enclave SDK at `C:\openenclave`, the Settings.json wou
 
 ## Debug Your Open Enclave Application
 
-Add a CDB Debug Configuration as shown below.
+Open the file you want to debug. For example, `host\host.c`. 
 
-![CDB Debug Configuration](images/VSCodeDebugConfiguration.png)
-
-Fill in program path, parameters and other values in the configuration.
-
-![Edit CDB Debug Configuration](images/VSCodeEditDebugConfiguration.png)
-
-Here is an example of launch.json after editing it.
+In the side panel, open "Run and Debug" and select "Create a launch.json file". In the selector for choosing a debugger, choose "C++ (Windows)" which you should then see a new launch.json file. You can either copy the below configuration, or create your own by selecting "Add Configuration" and then "C/C++: Windows (Launch)".
 
 ```json
 {
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch",
-            "type": "cdb",
+            "name": "(Windows) Launch",
+            "type": "cppvsdbg",
             "request": "launch",
             "program": "${workspaceRoot}/build/host/helloworld_host.exe",
-            "sourcepath": "${workspaceRoot}",
-            "workingdirectory": "${workspaceRoot}/build",
-            "debugthedebugger": false,
-            "initialbreak": false,
-            "initialcommands": ".sympath \"\"",
-            "args": "enclave/enclave.signed"
+            "args": ["enclave/enclave.signed"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceRoot}/build",
+            "environment": [],
+            "console": "externalTerminal"
         }
     ]
 }
 ```
 
-Open host.c and add a breakpoint. Start debugging.
+Add a breakpoint, and then start debugging (For example pressing the run button, or F5).
 
-![Host Breakpoint](images/VSCodeHostBreakpoint.png)
+![Host Breakpoint](images/VSCodeWindowsCppDbgHostBreakpoint.png)
 
 Step over the line that creates the enclave. The Console pane should show that the enclave has been loaded.
 
-![Stop After Enclave Creation](images/VSCodeStopAfterEnclaveCreation.png)
-
-Note: [CDB commands](https://docs.microsoft.com/en-us/windows-hardware/drivers/debugger/) can be executed in the Console Prompt.
-
-![Debug Console](images/VSCodeDebugConsole.png)
+![Stop After Enclave Creation](images/VSCodeWindowsCppDbgHostAfterEnclaveCreation.png)
 
 Open enc.c and put a breakpoint and continue execution.
 
-![Enclave Breakpoint](images/VSCodeEnclaveBreakpoint.png)
+![Enclave Breakpoint](images/VSCodeWindowsCppDbgEnclaveBreakpoint.png)
 
+## Additional information
 
-## Known Issues
-
-The VS Code Debugger extension is currently released as an early preview.
-These issues are being worked on and will be fixed in an upcoming update.
-
-- Breakpoints aren't yet completely persisted and restored correctly.
-Therefore, it is recommended that you clear all breakpoints and set them again every time the program is launched for debugging.
-- The debugging session is not terminated when the program runs to completion.
-Therefore, it is recommended that you stop and start a new debugging session each time.
-- The debug cursor often jumps to the start of the file while debugging within an enclave.
-Stepping again should take the cursor to the correct location.
+For known limitations and further details about Windows C/C++ debugging on Visual Studio Code, see [Debug C++ in Visual Studio Code](https://code.visualstudio.com/docs/cpp/cpp-debug)
