@@ -8,7 +8,7 @@ The latest version of Visual Studio Code can be installed from [https://code.vis
 
 ## Install VS Code Extensions
 
-Install the following VS Code extensions. Click on an image to navigate to the Visual Studio Code Marketplace page for the extension.
+Install the following VS Code extensions. Click on an image to navigate to the Visual Studio Code Marketplace page for the extension. Note that if you Remote-SSH into another workspace you will need to install this in your remote workspace as well.
 
 [![C/C++ Extension](images/VSCodeCppExtension.png)](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools)
 
@@ -73,7 +73,7 @@ Open settings.json under the .vscode folder and add entries for "C_Cpp.default.i
 
 ## Debugging an Open Enclave Application
 
-To configure VS Code for debugging an enclave app with GDB, go to the Debug tab in the side bar and select the settings cog to open this project's launch.json. Add the `miDebuggerPath` property to indicate where the `oegdb` script is installed. By default, this should be `/opt/openenclave/bin/oegdb`. The `program` and `args` properties should also be set to the location of the sample to debug, for example:
+To configure VS Code for debugging an enclave app with GDB, open up the file you want to debug, such as `host/host.c`. Then on the side bar, open the "Run and Debug" tab and select "Create a launch.json file". Alternatively you can create the file directly by creating `.vscode/launch.json`. Add the `miDebuggerPath` property to indicate where the `oegdb` script is installed. By default, this should be `/opt/openenclave/bin/oegdb`. The `program` and `args` properties should also be set to the location of the sample to debug, for example:
 
 ```json
 {
