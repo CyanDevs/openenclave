@@ -140,7 +140,7 @@ Step over the line that creates the enclave. The Console pane should show that t
 
 ![Stop After Enclave Creation](images/VSCodeWindowsCppDbgHostAfterEnclaveCreation.png)
 
-Open enc.c and put a breakpoint and continue execution.
+Open enc.c and put a breakpoint and continue execution (this doesn't work - doesn't stop at breakpoint!)
 
 ![Enclave Breakpoint](images/VSCodeWindowsCppDbgEnclaveBreakpoint.png)
 
