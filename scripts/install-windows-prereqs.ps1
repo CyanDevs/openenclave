@@ -546,6 +546,22 @@ function Install-DCAP-Dependencies {
         # Please refer to Intel's Windows DCAP documentation for this registry setting: https://download.01.org/intel-sgx/dcap-1.2/windows/docs/Intel_SGX_DCAP_Windows_SW_Installation_Guide.pdf
         New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\sgx_lc_msr\Parameters" -Name "SGX_Launch_Config_Optin" -Value 1 -PropertyType DWORD -Force
     }
+
+    # Install Intel QPL/QVL Libraries
+    $targetPath = [System.Environment]::SystemDirectory
+    Copy-Item -Force "$PACKAGES_DIRECTORY\Intel_SGX_DCAP\Intel SGX DCAP for Windows *\psw\WindowsServer2019_Windows10\sgx_default_qcnl_wrapper.dll" $targetPath
+    if($LASTEXITCODE -ne 0) {
+        Throw "Failed copy over sgx_default_qcnl_wrapper.dll"
+    }
+    Copy-Item -Force "$PACKAGES_DIRECTORY\Intel_SGX_DCAP\Intel SGX DCAP for Windows *\psw\WindowsServer2019_Windows10\dcap_quoteprov.dll" $targetPath
+    if($LASTEXITCODE -ne 0) {
+        Throw "Failed copy over dcap_quoteprov.dll"
+    }
+    Copy-Item -Force "$PACKAGES_DIRECTORY\Intel_SGX_DCAP\Intel SGX DCAP for Windows *\psw\WindowsServer2019_Windows10\dcap\sgx_dcap_ql.dll" $targetPath
+    if($LASTEXITCODE -ne 0) {
+        Throw "Failed copy over sgx_dcap_ql.dll"
+    }
+    New-ItemProperty -Path "HKLM:\HKEY_LOCAL_MACHINE\SOFTWARE\Intel\SGX\QCNL" -Name "PCCS_URL" -Value "https://pckcache-dev-webapp-wus2.azurewebsites.net/sgx/certification/v4/" -PropertyType string -Force
 }
 
 function Install-VCRuntime {
