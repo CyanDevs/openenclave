@@ -257,3 +257,8 @@ def exec_with_retry(int max_retries = 10, int retry_timeout = 30, Closure body) 
         }
     }
 }
+
+/* Determines if the current build was aborted due to a non-user caused timeout */
+def is_timeout_abort() {
+    return currentBuild.result == 'ABORTED' && currentBuild.getAbortCause().toString().contains('Timeout has been exceeded')
+}

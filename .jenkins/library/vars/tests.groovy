@@ -505,11 +505,23 @@ def windowsLinuxElfBuild(String windows_label, String ubuntu_label, String compi
 }
 
 def windowsCrossCompile(String label, String compiler, String build_type, String lvi_mitigation = 'None', String OE_SIMULATION = "0", String lvi_mitigation_skip_tests = 'OFF', List extra_cmake_args = []) {
-    stage("Windows ${label}-${compiler} ${build_type} with SGX LVI_MITIGATION=${lvi_mitigation}") {
-        node("${label}-${compiler}") {
-            withEnv(["OE_SIMULATION=${OE_SIMULATION}"]) {
-                timeout(globalvars.GLOBAL_TIMEOUT_MINUTES) {
-                    common.WinCompilePackageTest("build/X64-${build_type}", build_type, 'OFF', globalvars.CTEST_TIMEOUT_SECONDS, lvi_mitigation, lvi_mitigation_skip_tests, extra_cmake_args)
+    stage("Windows ${label} ${build_type} with SGX LVI_MITIGATION=${lvi_mitigation}") {
+        // fail fast and retry if Windows agent goes offline
+        retry(3) {
+            try {
+                node("${label}-${compiler}") { {
+                    withEnv(["OE_SIMULATION=${OE_SIMULATION}"]) {
+                        // Interrupt build if no output received from node for 15 minutes
+                        timeout(15, true, 'minutes') {
+                            // OFF value of quote provider until https://github.com/openenclave/openenclave-ci/pull/29 is merged
+                            common.WinCompilePackageTest("build/X64-${build_type}", build_type, 'OFF', globalvars.CTEST_TIMEOUT_SECONDS, lvi_mitigation, lvi_mitigation_skip_tests, extra_cmake_args)
+                        }
+                    }
+                }
+            }
+            catch(org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+                if(common.is_timeout_abort(e)) {
+                    println("Build timed out after 15 minutes of no output. Retrying...")
                 }
             }
         }
