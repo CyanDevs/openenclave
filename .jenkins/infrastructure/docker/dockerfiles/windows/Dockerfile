@@ -8,6 +8,6 @@
 
 FROM mcr.microsoft.com/windows/servercore:ltsc2019
 
-COPY --link . scripts
-RUN powershell.exe -ExecutionPolicy Unrestricted -NoLogo -NonInteractive -NoProfile -WindowStyle Hidden -File scripts\install-windows-prereqs.ps1 -InstallPath C:\oe_prereqs -LaunchConfiguration SGX1FLC-NoIntelDrivers -DCAPClientType None
-RUN del /s /q scripts
+# Changes have not decreased size from 20.7GB
+COPY . scripts
+RUN powershell.exe -ExecutionPolicy Unrestricted -NoLogo -NonInteractive -NoProfile -WindowStyle Hidden -File scripts\install-windows-prereqs.ps1 -InstallPath C:\oe_prereqs -LaunchConfiguration SGX1FLC-NoIntelDrivers -DCAPClientType None && del /s /q scripts
