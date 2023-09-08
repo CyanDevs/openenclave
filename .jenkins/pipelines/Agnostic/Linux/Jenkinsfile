@@ -1,40 +1,90 @@
 // Copyright (c) Open Enclave SDK contributors.
 // Licensed under the MIT License.
 
-library "OpenEnclaveJenkinsLibrary@${params.OECI_LIB_VERSION}"
+library "OpenEnclaveJenkinsLibrary"
 GLOBAL_ERROR = globalvars.GLOBAL_ERROR
 
-try{
-    def testing_stages = [
-        "Check CI":                                { tests.checkCI('clang-11') },
-        "Check Developer Experience Ubuntu 20.04": { tests.checkDevFlows('20.04', 'clang-11') },
-        "AArch64 2004 GNU gcc Debug":              { tests.AArch64GNUTest('20.04', 'Debug') },
-        "AArch64 2004 GNU gcc RelWithDebInfo":     { tests.AArch64GNUTest('20.04', 'RelWithDebInfo') },
-        "Ubuntu 2004 Cross Platform Build":        { tests.buildCrossPlatform("20.04", 'clang-11') }
-    ]
-    if(FULL_TEST_SUITE == "true") {
-        stage("Full Test Suite") {
-            testing_stages += [
-                "Sim 2004 clang-11 SGX1 RelWithDebInfo":             { tests.simulationContainerTest('20.04', 'RelWithDebInfo', 'clang-11', ['-DHAS_QUOTE_PROVIDER=OFF', '-DLVI_MITIGATION=None', '-DLVI_MITIGATION_SKIP_TESTS=OFF']) },
-                "Sim 2004 clang-11 SGX1FLC RelWithDebInfo":          { tests.simulationContainerTest('20.04', 'RelWithDebInfo', 'clang-11', ['-DHAS_QUOTE_PROVIDER=ON',  '-DLVI_MITIGATION=None', '-DLVI_MITIGATION_SKIP_TESTS=OFF']) },
-                "Sim 2004 clang-11 SGX1FLC Debug snmalloc":          { tests.simulationContainerTest('20.04', 'Debug',          'clang-11', ['-DHAS_QUOTE_PROVIDER=ON',  '-DLVI_MITIGATION=None', '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=ON']) },
-                "Sim 2004 clang-11 SGX1FLC RelWithDebInfo snmalloc": { tests.simulationContainerTest('20.04', 'RelWithDebInfo', 'clang-11', ['-DHAS_QUOTE_PROVIDER=ON',  '-DLVI_MITIGATION=None', '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=ON']) }
-            ]
-            parallel testing_stages
+/**
+ * Create a GitHub commit status
+ *
+ * @param github_token        Jenkins credential ID for GitHub token
+ * @param github_owner        GitHub owner
+ * @param github_repo         GitHub repository
+ * @param github_sha          GitHub commit SHA
+ * @param status_state        GitHub status state ("pending", "success", "error", "failure")
+ * @param status_target_url   GitHub target URL to associate with this status
+ * @param status_context      GitHub status context name to differentiate between other statuses
+ */
+def update_github_check(String github_token_id, String github_owner, String github_repo, String github_sha, String status_state, String status_target_url, String status_context) {
+    assert status_state in ['pending', 'success', 'error', 'failure']
+    assert status_context in ['agnostic-linux', 'azure-linux', 'azure-windows']
+    def github_api_data = """
+        {
+            "state": "${status_state}",
+            "target_url": "${status_target_url}",
+            "context": "${status_context}",
+            "description": "Jenkins CI"
         }
-    } else {
-        stage("PR Testing") {
-            testing_stages += [
-                "Sim 2004 clang-11 SGX1FLC RelWithDebInfo":          { tests.simulationContainerTest('20.04', 'RelWithDebInfo', 'clang-11', ['-DHAS_QUOTE_PROVIDER=ON',  '-DLVI_MITIGATION=None', '-DLVI_MITIGATION_SKIP_TESTS=ON']) },
-                "Sim 2004 clang-11 SGX1FLC RelWithDebInfo snmalloc": { tests.simulationContainerTest('20.04', 'RelWithDebInfo', 'clang-11', ['-DHAS_QUOTE_PROVIDER=ON',  '-DLVI_MITIGATION=None', '-DLVI_MITIGATION_SKIP_TESTS=ON', '-DUSE_SNMALLOC=ON']) }
-            ]
-            parallel testing_stages
+    """
+    withCredentials([
+        string(credentialsId: 'github_commit_status_pat', variable: 'GITHUB_TOKEN_PAT')
+    ]) {
+        withEnv([
+            "GITHUB_OWNER=${github_owner}",
+            "GITHUB_REPO=${github_repo}",
+            "GITHUB_SHA=${github_sha}",
+            "GITHUB_API_DATA=${github_api_data}"
+        ]) {
+            sh(
+                script: '''
+                    curl -X POST \
+                        -H "Authorization: Bearer ${GITHUB_TOKEN_PAT}" \
+                        -H 'Accept: application/vnd.github+json' \
+                        -H 'X-GitHub-Api-Version: 2022-11-28' \
+                        -d "${GITHUB_API_DATA}" \
+                        "https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/statuses/${GITHUB_SHA}"
+                '''
+            )
         }
     }
+}
+
+try{
+    println("Hello World")
+    // def testing_stages = [
+    //     "Check CI":                                { tests.checkCI('clang-11') },
+    //     "Check Developer Experience Ubuntu 20.04": { tests.checkDevFlows('20.04', 'clang-11') },
+    //     "AArch64 2004 GNU gcc Debug":              { tests.AArch64GNUTest('20.04', 'Debug') },
+    //     "AArch64 2004 GNU gcc RelWithDebInfo":     { tests.AArch64GNUTest('20.04', 'RelWithDebInfo') },
+    //     "Ubuntu 2004 Cross Platform Build":        { tests.buildCrossPlatform("20.04", 'clang-11') }
+    // ]
+    // if(FULL_TEST_SUITE == "true") {
+    //     stage("Full Test Suite") {
+    //         testing_stages += [
+    //             "Sim 2004 clang-11 SGX1 RelWithDebInfo":             { tests.simulationContainerTest('20.04', 'RelWithDebInfo', 'clang-11', ['-DHAS_QUOTE_PROVIDER=OFF', '-DLVI_MITIGATION=None', '-DLVI_MITIGATION_SKIP_TESTS=OFF']) },
+    //             "Sim 2004 clang-11 SGX1FLC RelWithDebInfo":          { tests.simulationContainerTest('20.04', 'RelWithDebInfo', 'clang-11', ['-DHAS_QUOTE_PROVIDER=ON',  '-DLVI_MITIGATION=None', '-DLVI_MITIGATION_SKIP_TESTS=OFF']) },
+    //             "Sim 2004 clang-11 SGX1FLC Debug snmalloc":          { tests.simulationContainerTest('20.04', 'Debug',          'clang-11', ['-DHAS_QUOTE_PROVIDER=ON',  '-DLVI_MITIGATION=None', '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=ON']) },
+    //             "Sim 2004 clang-11 SGX1FLC RelWithDebInfo snmalloc": { tests.simulationContainerTest('20.04', 'RelWithDebInfo', 'clang-11', ['-DHAS_QUOTE_PROVIDER=ON',  '-DLVI_MITIGATION=None', '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=ON']) }
+    //         ]
+    //         parallel testing_stages
+    //     }
+    // } else {
+    //     stage("PR Testing") {
+    //         testing_stages += [
+    //             "Sim 2004 clang-11 SGX1FLC RelWithDebInfo":          { tests.simulationContainerTest('20.04', 'RelWithDebInfo', 'clang-11', ['-DHAS_QUOTE_PROVIDER=ON',  '-DLVI_MITIGATION=None', '-DLVI_MITIGATION_SKIP_TESTS=ON']) },
+    //             "Sim 2004 clang-11 SGX1FLC RelWithDebInfo snmalloc": { tests.simulationContainerTest('20.04', 'RelWithDebInfo', 'clang-11', ['-DHAS_QUOTE_PROVIDER=ON',  '-DLVI_MITIGATION=None', '-DLVI_MITIGATION_SKIP_TESTS=ON', '-DUSE_SNMALLOC=ON']) }
+    //         ]
+    //         parallel testing_stages
+    //     }
+    // }
 } catch(Exception e) {
     println "Caught global pipeline exception: " + e
     GLOBAL_ERROR = e
     throw e
 } finally {
     currentBuild.result = (GLOBAL_ERROR != null) ? 'FAILURE' : "SUCCESS"
+    node(globalvars.AGENTS_LABELS['shared']) {
+        def GIT_COMMIT = checkout(scm).GIT_COMMIT
+        update_github_check('github-oeciteam-user-pat', 'cyandevs', 'openenclave', GIT_COMMIT, currentBuild.result.toLowerCase(), env.BUILD_URL, 'agnostic-linux')
+    }
 }

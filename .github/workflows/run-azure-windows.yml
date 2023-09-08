@@ -1,0 +1,21 @@
+# Copyright (c) Open Enclave SDK contributors.
+# Licensed under the MIT License.
+
+name: run-azure-windows
+on:
+  issue_comment:
+    types: [created]
+jobs:
+  azure-windows:
+    if: |
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '/azure-windows') &&
+      github.event.comment.author_association == 'COLLABORATOR'
+    runs-on: ubuntu-latest
+    steps:
+      - run: 
+          curl -X POST
+            --user ${{ secrets.JENKINS_API_PAT }}
+            --data "BRANCH_NAME=${{ github.head_ref }}"
+            --data "REPOSITORY_NAME=${{ github.repository }}"
+            https://openenclaveci.westus.cloudapp.azure.com/job/OpenEnclave/job/Agnostic-Linux/buildWithParameters
