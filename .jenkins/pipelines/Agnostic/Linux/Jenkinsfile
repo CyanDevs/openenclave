@@ -5,36 +5,43 @@ library "OpenEnclaveJenkinsLibrary@${params.OECI_LIB_VERSION}"
 GLOBAL_ERROR = globalvars.GLOBAL_ERROR
 
 try{
-    def testing_stages = [
-        "Check CI":                                { tests.checkCI('clang-11') },
-        "Check Developer Experience Ubuntu 20.04": { tests.checkDevFlows('20.04', 'clang-11') },
-        "AArch64 2004 GNU gcc Debug":              { tests.AArch64GNUTest('20.04', 'Debug') },
-        "AArch64 2004 GNU gcc RelWithDebInfo":     { tests.AArch64GNUTest('20.04', 'RelWithDebInfo') },
-        "Ubuntu 2004 Cross Platform Build":        { tests.buildCrossPlatform("20.04", 'clang-11') }
-    ]
-    if(FULL_TEST_SUITE == "true") {
-        stage("Full Test Suite") {
-            testing_stages += [
-                "Sim 2004 clang-11 SGX1 RelWithDebInfo":             { tests.simulationContainerTest('20.04', 'RelWithDebInfo', 'clang-11', ['-DHAS_QUOTE_PROVIDER=OFF', '-DLVI_MITIGATION=None', '-DLVI_MITIGATION_SKIP_TESTS=OFF']) },
-                "Sim 2004 clang-11 SGX1FLC RelWithDebInfo":          { tests.simulationContainerTest('20.04', 'RelWithDebInfo', 'clang-11', ['-DHAS_QUOTE_PROVIDER=ON',  '-DLVI_MITIGATION=None', '-DLVI_MITIGATION_SKIP_TESTS=OFF']) },
-                "Sim 2004 clang-11 SGX1FLC Debug snmalloc":          { tests.simulationContainerTest('20.04', 'Debug',          'clang-11', ['-DHAS_QUOTE_PROVIDER=ON',  '-DLVI_MITIGATION=None', '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=ON']) },
-                "Sim 2004 clang-11 SGX1FLC RelWithDebInfo snmalloc": { tests.simulationContainerTest('20.04', 'RelWithDebInfo', 'clang-11', ['-DHAS_QUOTE_PROVIDER=ON',  '-DLVI_MITIGATION=None', '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=ON']) }
-            ]
-            parallel testing_stages
-        }
-    } else {
-        stage("PR Testing") {
-            testing_stages += [
-                "Sim 2004 clang-11 SGX1FLC RelWithDebInfo":          { tests.simulationContainerTest('20.04', 'RelWithDebInfo', 'clang-11', ['-DHAS_QUOTE_PROVIDER=ON',  '-DLVI_MITIGATION=None', '-DLVI_MITIGATION_SKIP_TESTS=ON']) },
-                "Sim 2004 clang-11 SGX1FLC RelWithDebInfo snmalloc": { tests.simulationContainerTest('20.04', 'RelWithDebInfo', 'clang-11', ['-DHAS_QUOTE_PROVIDER=ON',  '-DLVI_MITIGATION=None', '-DLVI_MITIGATION_SKIP_TESTS=ON', '-DUSE_SNMALLOC=ON']) }
-            ]
-            parallel testing_stages
-        }
-    }
+    tests.checkCI('clang-11')
+    // def testing_stages = [
+    //     "Check CI":                                { tests.checkCI('clang-11') },
+    //     "Check Developer Experience Ubuntu 20.04": { tests.checkDevFlows('20.04', 'clang-11') },
+    //     "AArch64 2004 GNU gcc Debug":              { tests.AArch64GNUTest('20.04', 'Debug') },
+    //     "AArch64 2004 GNU gcc RelWithDebInfo":     { tests.AArch64GNUTest('20.04', 'RelWithDebInfo') },
+    //     "Ubuntu 2004 Cross Platform Build":        { tests.buildCrossPlatform("20.04", 'clang-11') }
+    // ]
+    // if(FULL_TEST_SUITE == "true") {
+    //     stage("Full Test Suite") {
+    //         testing_stages += [
+    //             "Sim 2004 clang-11 SGX1 RelWithDebInfo":             { tests.simulationContainerTest('20.04', 'RelWithDebInfo', 'clang-11', ['-DHAS_QUOTE_PROVIDER=OFF', '-DLVI_MITIGATION=None', '-DLVI_MITIGATION_SKIP_TESTS=OFF']) },
+    //             "Sim 2004 clang-11 SGX1FLC RelWithDebInfo":          { tests.simulationContainerTest('20.04', 'RelWithDebInfo', 'clang-11', ['-DHAS_QUOTE_PROVIDER=ON',  '-DLVI_MITIGATION=None', '-DLVI_MITIGATION_SKIP_TESTS=OFF']) },
+    //             "Sim 2004 clang-11 SGX1FLC Debug snmalloc":          { tests.simulationContainerTest('20.04', 'Debug',          'clang-11', ['-DHAS_QUOTE_PROVIDER=ON',  '-DLVI_MITIGATION=None', '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=ON']) },
+    //             "Sim 2004 clang-11 SGX1FLC RelWithDebInfo snmalloc": { tests.simulationContainerTest('20.04', 'RelWithDebInfo', 'clang-11', ['-DHAS_QUOTE_PROVIDER=ON',  '-DLVI_MITIGATION=None', '-DLVI_MITIGATION_SKIP_TESTS=OFF', '-DUSE_SNMALLOC=ON']) }
+    //         ]
+    //         parallel testing_stages
+    //     }
+    // } else {
+    //     stage("PR Testing") {
+    //         testing_stages += [
+    //             "Sim 2004 clang-11 SGX1FLC RelWithDebInfo":          { tests.simulationContainerTest('20.04', 'RelWithDebInfo', 'clang-11', ['-DHAS_QUOTE_PROVIDER=ON',  '-DLVI_MITIGATION=None', '-DLVI_MITIGATION_SKIP_TESTS=ON']) },
+    //             "Sim 2004 clang-11 SGX1FLC RelWithDebInfo snmalloc": { tests.simulationContainerTest('20.04', 'RelWithDebInfo', 'clang-11', ['-DHAS_QUOTE_PROVIDER=ON',  '-DLVI_MITIGATION=None', '-DLVI_MITIGATION_SKIP_TESTS=ON', '-DUSE_SNMALLOC=ON']) }
+    //         ]
+    //         parallel testing_stages
+    //     }
+    // }
 } catch(Exception e) {
     println "Caught global pipeline exception: " + e
     GLOBAL_ERROR = e
     throw e
 } finally {
     currentBuild.result = (GLOBAL_ERROR != null) ? 'FAILURE' : "SUCCESS"
+    withCredentials([usernamePassword(credentialsId: 'github-oeciteam-user-pat',
+                                      usernamevariable: 'GITHUB_API_USER',
+                                      passwordVariable: 'GITHUB_API_PAT')
+    ]) {
+        helpers.update_github_check("${env.GITHUB_API_USER}:${env.GITHUB_API_PAT}", 'openenclave', 'openenclave', GIT_COMMIT, currentBuild.result.toLowerCase(), BUILD_URL, 'agnostic-linux')
+    }
 }

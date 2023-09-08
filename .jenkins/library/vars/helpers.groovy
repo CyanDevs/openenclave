@@ -673,3 +673,39 @@ def check_if_retry(int max_try_count, int try_count) {
         return false
     }
 }
+
+
+/**
+ * Create a GitHub commit status
+ *
+ * @param github_token        GitHub token in user:PAT format
+ * @param github_owner        GitHub owner
+ * @param github_repo         GitHub repository
+ * @param github_sha          GitHub commit SHA
+ * @param status_state        GitHub status state ("pending", "success", "error", "failure")
+ * @param status_target_url   GitHub target URL to associate with this status
+ * @param status_context      GitHub status context name to differentiate between other statuses
+ */
+def update_github_check(String github_token, String github_owner, String github_repo, String github_sha, String status_state, String status_target_url, String status_context) {
+    assert status_state in ['pending', 'success', 'error', 'failure']
+    assert status_context in ['agnostic-linux', 'azure-linux', 'azure-windows']
+    def github_api_data = """
+        {
+            "state": "${status_state}",
+            "target_url": "${status_target_url}",
+            "context": "${status_context}",
+            "description": null
+        }
+    """
+    sh(
+        returnStdout: true,
+        script: """
+            curl -X PATCH \
+                 -H "Authorization: token ${github_token}" \
+                 -H "Accept: application/vnd.github+json" \
+                 -H "X-GitHub-Api-Version: 2022-11-28" \
+                 -d '${github_api_data}' \
+                 "https://api.github.com/repos/${github_owner}/${github_repo}/statuses/${github_sha}"
+        """
+    ).trim()
+}
