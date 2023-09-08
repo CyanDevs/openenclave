@@ -1,5 +1,6 @@
 # Copyright (c) Open Enclave SDK contributors.
 # Licensed under the MIT License.
+# Test change
 
 cmake_minimum_required(VERSION 3.11)
 

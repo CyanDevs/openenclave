@@ -8,9 +8,8 @@ on:
 jobs:
   azure-windows:
     if: |
-      github.event.issue.pull_request &&
-      contains(github.event.comment.body, '/azure-windows') &&
-      github.event.comment.author_association == 'COLLABORATOR'
+      ${{ github.event.issue.pull_request }} &&
+      contains(github.event.comment.body, '/azure-windows')
     runs-on: ubuntu-latest
     steps:
       - run: 
