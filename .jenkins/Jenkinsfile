@@ -195,7 +195,7 @@ pipeline {
                             parameters: [
                                 string(name: 'PULL_REQUEST_ID', value: PULL_REQUEST_ID),
                                 string(name: 'REPOSITORY_NAME', value: params.REPOSITORY_NAME),
-                                string(name: 'BRANCH_NAME', value: params.BRANCH_NAME),
+                                string(name: 'BRANCH_NAME', value: params.BRANCH),
                                 string(name: 'DOCKER_TAG', value: params.DOCKER_TAG),
                                 string(name: 'UBUNTU_NONSGX_CUSTOM_LABEL', value: globalvars.AGENTS_LABELS["ubuntu-nonsgx"]),
                                 string(name: 'OECI_LIB_VERSION', value: params.OECI_LIB_VERSION),
@@ -209,7 +209,7 @@ pipeline {
                             parameters: [
                                 string(name: 'PULL_REQUEST_ID', value: PULL_REQUEST_ID),
                                 string(name: 'REPOSITORY_NAME', value: params.REPOSITORY_NAME),
-                                string(name: 'BRANCH_NAME', value: params.BRANCH_NAME),
+                                string(name: 'BRANCH_NAME', value: params.BRANCH),
                                 string(name: 'DOCKER_TAG', value: params.DOCKER_TAG),
                                 string(name: 'UBUNTU_2004_CUSTOM_LABEL', value: globalvars.AGENTS_LABELS["acc-ubuntu-20.04"]),
                                 string(name: 'UBUNTU_NONSGX_CUSTOM_LABEL', value: globalvars.AGENTS_LABELS["ubuntu-nonsgx"]),
@@ -225,7 +225,7 @@ pipeline {
                             parameters: [
                                 string(name: 'PULL_REQUEST_ID', value: PULL_REQUEST_ID),
                                 string(name: 'REPOSITORY_NAME', value: params.REPOSITORY_NAME),
-                                string(name: 'BRANCH_NAME', value: params.BRANCH_NAME),
+                                string(name: 'BRANCH_NAME', value: params.BRANCH),
                                 string(name: 'DOCKER_TAG', value: params.DOCKER_TAG),
                                 string(name: 'UBUNTU_NONSGX_CUSTOM_LABEL', value: globalvars.AGENTS_LABELS["ubuntu-nonsgx"]),
                                 string(name: 'WS2019_DCAP_CFL_LABEL', value: globalvars.AGENTS_LABELS["acc-win2019-dcap"]),
