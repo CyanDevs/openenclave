@@ -830,7 +830,17 @@ def oeCheckoutScm(String PULL_REQUEST_ID) {
         cleanWs()
         checkout([$class: 'GitSCM',
             branches: [[name: "pr/${PULL_REQUEST_ID}"]],
-            extensions: [],
+            doGenerateSubmoduleConfigurations: false,
+            extensions: [[ $class: 'SubmoduleOption',
+                           parentCredentials: true,
+                           reference: '',
+                           disableSubmodules: false,
+                           recursiveSubmodules: true,
+                           trackingSubmodules: false,
+                           timeout: 30,
+                           shallow: true,
+                           depth: 1
+            ]],
             userRemoteConfigs: [[
                 url: 'https://github.com/cyandevs/openenclave',
                 refspec: "+refs/pull/${PULL_REQUEST_ID}/merge:refs/remotes/origin/pr/${PULL_REQUEST_ID}"
