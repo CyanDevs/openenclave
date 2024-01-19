@@ -15,9 +15,9 @@
 void enclave_helloworld()
 {
     // Purposely use up all memory in the enclave
-    int size = 1024;
+    int size = 1024*1024; // 1Mi
     int multiplier = 1;
-    while (multiplier++ < 4090) {
+    while (multiplier++ < 300 ) { // 300Mi upper memory bound
         int myArray[size * multiplier];
         myArray[size * multiplier - 1] = multiplier;
         int myArraySize = (int) sizeof(myArray);
